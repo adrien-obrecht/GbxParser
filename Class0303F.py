@@ -5,7 +5,7 @@ from ByteReader import ByteReader
 
 
 def Chunk005(bp):
-    uncompSize = bp.uint32()
+    uncompSize = bp.uint32('')
     compSize = bp.uint32()
     compData = bp.read(compSize)
     data = zlib.decompress(compData, 0, uncompSize)

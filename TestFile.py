@@ -1,8 +1,10 @@
+import random
+
 from Parser import *
 from ByteWriter import ByteWriter
 from Headers import Block
-from ByteReader import ByteReader
 import BlockImporter
+import StadiumBlocks
 
 
 def getBlockList(bw):
@@ -36,15 +38,20 @@ g = Gbx("C:\\Users\\User\\Documents\\TmForever\\Tracks\\Map.Challenge.Gbx")
 bw = ByteWriter()
 
 bw.valueHandler = g.root_parser.valueHandler
-
+print(bw.valueHandler)
 
 
 bw.chunkOrder = g.root_parser.chunkOrder
 bw.nodeNames = g.root_parser.nodeNames
 
 blocks = getBlockList(bw)
-for block in blocks:
-    block.rotation += 1
+for i in range(10):
+    b = Block()
+    b.position = [random.randint(1, 10), random.randint(1, 10), random.randint(1, 10)]
+    b.rotation = random.randint(0, 4)
+    b.flags = 0
+    b.name = 'StadiumRoadMainStartLine'
+    blocks.append(b)
 writeBlockList(bw, blocks)
 print(bw.valueHandler[50606111])
 bw.currentChunk = 0
@@ -53,7 +60,7 @@ BlockImporter.chunkLink[0](bw)
 
 g_ = Gbx(bw.data)
 
-f = open("test.Challenge.Gbx", "wb+")
+f = open("C:\\Users\\User\\Documents\\TmForever\\Tracks\\Challenges\\test.Challenge.Gbx", "wb+")
 f.write(bytes(bw.data))
 f.close()
 

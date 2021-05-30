@@ -110,7 +110,7 @@ class ByteWriter:
         else:
             self.read(0, name)
 
-    def lookbackString(self, name, isRef=True):
+    def lookbackString(self, name, isRef=True, gameStrings=False):
         if isRef:
             val = self.valueHandler[self.currentChunk][name]
         else:
@@ -121,7 +121,7 @@ class ByteWriter:
         if val == '':
             self.uint32(2 ** 32 - 1, isRef=False)
         elif val not in self.storedStrings:
-            if val not in {"Stadium", "Day", "Nadeo", 'StadiumRoadMainStartLine', 'StadiumRoadMainFinishLine'}:
+            if val not in {"Stadium", "Day", "Nadeo", 'StadiumRoadMainStartLine', 'StadiumRoadMainFinishLine'} or gameStrings:
                 self.uint32(2**31, isRef=False)
             else:
                 self.uint32(2**30, isRef=False)

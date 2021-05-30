@@ -62,21 +62,6 @@ class ByteReader(object):
         self.chunkValue = {}
         self.chunkOrder = []
 
-    def push_info(self):
-        """Begins a section that can be then retrieved with pop_info."""
-        self.current_info = PositionInfo(self.pos, 0)
-
-    def pop_info(self):
-        """Ends the section began with push_info.
-
-        Returns:
-            a PositionInfo marking the section
-        """
-        self.current_info.size = self.pos - self.current_info.pos
-        info = self.current_info
-        self.current_info = PositionInfo(-1, 0)
-        return info
-
     def readNode(self):
         import BlockImporter
         while True:
@@ -327,7 +312,7 @@ class ByteReader(object):
         """
         self.pos += num_bytes
 
-    def lookbackString(self, name=None):
+    def lookbackString(self, name=None, gameStrings=False):
         """Reads a special string type in the GBX file format called the lookbackstring.
 
         Such type is used to reference already read strings, or introduce them if they were not

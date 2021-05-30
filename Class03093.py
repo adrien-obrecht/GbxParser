@@ -1,27 +1,26 @@
 """CGameCtnReplayRecord"""
 
-from pygbx import Gbx
-
 
 def Chunk000(bp):
     version = bp.uint32('version')
     if version >= 2:
-        trackUID = bp.lookbackString()
-        environment = bp.lookbackString()
-        author = bp.lookbackString()
+        bp.lookbackString('trackUID')
+        bp.lookbackString('environment')
+        bp.lookbackString('author')
         bp.uint32('time')
         bp.string('nickname')
         if version >= 6:
             bp.string('driverLogin')
-            bp.byte()
-            titleUID = bp.lookbackString()
+            bp.byte('u1')
+            titleUID = bp.lookbackString('titleUID')
 
 
 def Chunk001(bp):
-    bp.string(decode=False)  # XML
+    bp.string(decode=False, name='XML')  # XML
 
 
 def Chunk002(bp):
+    from Parser import Gbx
     GBXSize = bp.uint32('GBXSize')
     data = bytes(bp.read(GBXSize))
     try:
@@ -31,9 +30,12 @@ def Chunk002(bp):
 
 
 def Chunk007(bp):
-    bp.uint32()
+    bp.uint32('u1')
 
 
 def Chunk014(bp):
-    bp.skip(4)
-    num_ghosts = bp.array('subNode')
+    bp.read(4, name='u1')
+    numGhosts = bp.uint32('numGhosts')
+    for i in range(numGhosts):
+        bp.nodeRef(f'ghost {i}')
+    bp.read(16, name='u2')
