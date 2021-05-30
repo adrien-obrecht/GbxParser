@@ -44,14 +44,17 @@ print(bw.valueHandler)
 bw.chunkOrder = g.root_parser.chunkOrder
 bw.nodeNames = g.root_parser.nodeNames
 
-blocks = getBlockList(bw)
-for i in range(10):
+blocks = []
+posList = set()
+for i in range(1000):
     b = Block()
-    b.position = [random.randint(1, 10), random.randint(1, 10), random.randint(1, 10)]
-    b.rotation = random.randint(0, 4)
+    b.position = [random.randint(5, 25), random.randint(2, 12), random.randint(5, 25)]
+    b.rotation = random.randint(0, 3)
     b.flags = 0
-    b.name = 'StadiumRoadMainStartLine'
-    blocks.append(b)
+    b.name = StadiumBlocks.STADIUM_BLOCKS[random.randint(0, len(StadiumBlocks.STADIUM_BLOCKS)-1)]
+    if str(b.position) not in posList:
+        posList.add(str(b.position))
+        blocks.append(b)
 writeBlockList(bw, blocks)
 print(bw.valueHandler[50606111])
 bw.currentChunk = 0
@@ -60,7 +63,7 @@ BlockImporter.chunkLink[0](bw)
 
 g_ = Gbx(bw.data)
 
-f = open("C:\\Users\\User\\Documents\\TmForever\\Tracks\\Challenges\\test.Challenge.Gbx", "wb+")
+f = open("C:\\Users\\User\\Documents\\TmForever\\Tracks\\Challenges\\My CHallenges\\test.Challenge.Gbx", "wb+")
 f.write(bytes(bw.data))
 f.close()
 

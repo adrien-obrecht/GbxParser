@@ -120,15 +120,9 @@ class ByteWriter:
             self.seenLookback = True
         if val == '':
             self.uint32(2 ** 32 - 1, isRef=False)
-        elif val not in self.storedStrings:
-            if val not in {"Stadium", "Day", "Nadeo", 'StadiumRoadMainStartLine', 'StadiumRoadMainFinishLine'} or gameStrings:
-                self.uint32(2**31, isRef=False)
-            else:
-                self.uint32(2**30, isRef=False)
-            self.string(val, isRef=False)
-            self.storedStrings.append(val)
         else:
-            self.uint32(self.storedStrings.index(val) + 2**30, isRef=False)
+            self.uint32(2**30, isRef=False)
+            self.string(val, isRef=False)
 
     def byte(self, name, isRef=True):
         if isRef:

@@ -208,7 +208,6 @@ STADIUM_BLOCKS = [
     'StadiumRoadDirtHigh',
     'StadiumRoadDirtHighCheckpoint',
     'StadiumRoadDirtHighGTCurve3',
-    'BStadiumRoadDirtToRoadDirtHigh',
     'StadiumRoadDirtToRoadDirtHigh2',
     'StadiumRoadDirtToRoadDirtHighBridge',
     'StadiumRoadDirtToRoadDirtHighCross',
@@ -293,7 +292,6 @@ STADIUM_BLOCKS = [
     'StadiumInflatablePalmTree',
     'StadiumRoadDirtHighToRoad',
     'StadiumDirtHill',
-    'StadiumPlatformBiSlope2StartSmall',
     'StadiumWaterClip',
     'StadiumDirtClip',
     'StadiumGrass']
