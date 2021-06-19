@@ -146,7 +146,7 @@ def Chunk01F(bp):
         bp.byte(f'posZ {i}')
         if version == 0:
             flags = bp.uint16(f'flags {i}')
-        else:
+        if version > 0:
             flags = bp.uint32(f'flags {i}')
         if flags == 0xFFFFFFFF:
             continue

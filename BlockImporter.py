@@ -2,8 +2,19 @@ import Class0301B
 import Class0305B
 import Class0303F
 import Class03043
+import Class03059
+import Class03078
+import Class03079
+import Class0307A
+import Class03082
 import Class03092
 import Class03093
+import Class030A2
+import Class030A5
+import Class030A8
+import Class030AB
+import Class030E5
+import Class07010
 import Header
 
 chunkLink = {0x00000000: Header.writeHead,
@@ -37,6 +48,19 @@ chunkLink = {0x00000000: Header.writeHead,
              0x03043029: Class03043.Chunk029,
              0x0304302A: Class03043.Chunk02A,
 
+             0x03059002: Class03059.Chunk002,
+
+             0x03078001: Class03078.Chunk001,
+             0x03078004: Class03078.Chunk004,
+
+             0x03079004: Class03079.Chunk004,
+             0x03079005: Class03079.Chunk005,
+             0x03079007: Class03079.Chunk007,
+
+             0x0307A003: Class0307A.Chunk003,
+
+             0x03082000: Class03082.Chunk000,
+
              0x03092005: Class03092.Chunk005,
              0x03092008: Class03092.Chunk008,
              0x03092009: Class03092.Chunk009,
@@ -58,7 +82,21 @@ chunkLink = {0x00000000: Header.writeHead,
              0x03093001: Class03093.Chunk001,
              0x03093002: Class03093.Chunk002,
              0x03093007: Class03093.Chunk007,
-             0x03093014: Class03093.Chunk014}
+             0x03093014: Class03093.Chunk014,
+
+             0x030A2005: Class030A2.Chunk005,
+
+             0x030A5000: Class030A5.Chunk000,
+
+             0x030A8001: Class030A8.Chunk001,
+             0x030A8002: Class030A8.Chunk002,
+
+             0x030AB000: Class030AB.Chunk000,
+
+             0x030E5001: Class030E5.Chunk001,
+
+             0x07010003: Class07010.Chunk003,
+             0x07010005: Class07010.Chunk005}
 
 skipableChunkList = {0x03043017,
                      0x03043018,
