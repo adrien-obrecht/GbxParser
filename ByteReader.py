@@ -142,21 +142,16 @@ class ByteReader(object):
         import binascii
         return binascii.hexlify(self.read(size))
 
-    def array(self, varType):
-        size = self.uint32()
-        array = []
-        for _ in range(size):
-            if varType == 'uint32':
-                array.append(self.uint32())
-            elif varType == 'nodeRef':
-                array.append(self.nodeRef())
-            elif varType == 'fileRef':
-                array.append(self.fileRef())
-            elif varType == 'lookbackString':
-                array.append(self.lookbackString())
-            elif varType == 'byte':
-                array.append(self.byte())
-        return array
+    def array(self, arrName, valList):
+        size = self.uint32('size')
+        arr = []
+        for i in range(size):
+            vH = {}
+            for (val, name) in valList:
+                vH[name] = val(self)
+            arr.append(vH)
+        print("heyy", arr)
+        self.chunkValue[arrName] = arr
 
     def fileRef(self, name=None):
         version = self.byte()

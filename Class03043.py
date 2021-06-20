@@ -45,7 +45,6 @@ def Chunk003(bp):
     bp.string('trackName')
     bp.byte('kind')
     if version >= 1:
-
         bp.bool('locked')
         bp.string('password')
         if version >= 2:
@@ -104,6 +103,10 @@ def Chunk011(bp):
 
 
 def Chunk017(bp):
+    #bp.array('checkPoints',
+    #         [(lambda x: x.uint32(), 'cp1'),
+    #          (lambda x: x.uint32(), 'cp2'),
+    #          (lambda x: x.uint32(), 'cp3')])
     numCheckpoints = bp.uint32('numCheckpoints')
     for i in range(numCheckpoints):
         bp.uint32(f'Cp {i} 1')

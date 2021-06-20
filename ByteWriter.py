@@ -174,6 +174,17 @@ class ByteWriter:
             self.int32(-1, isRef=False)
         self.valueHandler = vH
 
+    def array(self, arrName, valList):
+        arr = self.valueHandler[self.currentChunk][arrName]
+        self.uint32(len(arr), isRef=False)
+        for i in range(len(arr)):
+            vH = arr[i]
+            for (val, name) in valList:
+                val(self)
+            arr.append(vH)
+        print("heyy", arr)
+        self.chunkValue[arrName] = arr
+
     def fileRef(self, name=None):
         val = self.valueHandler[self.currentChunk][name]
         print(val, "333#")

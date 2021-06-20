@@ -7,4 +7,4 @@ def Chunk001(bp):
 
 
 def Chunk002(bp):
-    bp.vec3('textCOlor')
+    bp.vec3('textColor')

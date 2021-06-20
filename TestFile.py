@@ -15,7 +15,7 @@ g = Gbx("C:\\Users\\User\\Documents\\TmForever\\Tracks\\Challenges\\Map.Challeng
 bw = ByteWriter()
 
 bw.valueHandler = g.root_parser.valueHandler
-
+print(bw.valueHandler)
 
 bw.chunkOrder = g.root_parser.chunkOrder
 bw.nodeNames = g.root_parser.nodeNames
@@ -46,7 +46,7 @@ f = open("C:\\Users\\User\\Documents\\TmForever\\Tracks\\Challenges\\My CHalleng
 f.write(bytes(bw.data))
 f.close()
 
-print(bw.valueHandler)
+
 print(g_.root_parser.valueHandler)
 
 for diff in list(dictdiffer.diff(bw.valueHandler, g_.root_parser.valueHandler)):

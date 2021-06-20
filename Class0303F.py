@@ -39,4 +39,4 @@ def readChunk005(bp):
 
     if not bSkipList2:
         num = bp.uint32()
-        sampleTimes = bp.array('uint32')
+        sampleTimes = bp.array(lambda x: x.uint32('time'))
