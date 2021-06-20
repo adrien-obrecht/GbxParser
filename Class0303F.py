@@ -5,6 +5,13 @@ from ByteReader import ByteReader
 
 
 def Chunk005(bp):
+    if type(bp) == type(ByteReader('')):
+        readChunk005(bp)
+    else:
+        print("nn")
+
+
+def readChunk005(bp):
     uncompSize = bp.uint32('')
     compSize = bp.uint32()
     compData = bp.read(compSize)

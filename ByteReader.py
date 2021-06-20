@@ -172,7 +172,7 @@ class ByteReader(object):
             locatorUrl = None
 
         if name is not None:
-            self.chunkValue[name] = {'checksum': checkSum, 'filePath': filePath, 'locatorUrl': locatorUrl}
+            self.chunkValue[name] = {'version' : version, 'checksum': checkSum, 'filePath': filePath, 'locatorUrl': locatorUrl}
         return checkSum, filePath, locatorUrl
 
     def size(self):

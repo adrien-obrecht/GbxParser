@@ -5,16 +5,16 @@ from ByteWriter import ByteWriter
 from Headers import Block
 import BlockImporter
 import StadiumBlocks
+import dictdiffer
 import Methods
 
 
-g = Gbx("C:\\Users\\User\\Documents\\TmForever\\Tracks\\_Somewhere_I_belong.Challenge.Gbx")
+g = Gbx("C:\\Users\\User\\Documents\\TmForever\\Tracks\\Challenges\\Map.Challenge.Gbx")
 
 
 bw = ByteWriter()
 
 bw.valueHandler = g.root_parser.valueHandler
-print(bw.valueHandler)
 
 
 bw.chunkOrder = g.root_parser.chunkOrder
@@ -32,7 +32,7 @@ for i in range(300):
         posList.add(str(b.position))
         blocks.append(b)
 
-Methods.erasePassword(bw)
+# Methods.erasePassword(bw)
 
 # Methods.pushBlockList(bw, blocks)
 
@@ -40,11 +40,19 @@ Methods.erasePassword(bw)
 bw.currentChunk = 0
 BlockImporter.chunkLink[0](bw)
 
-# g_ = Gbx(bw.data)
+g_ = Gbx(bw.data)
 
 f = open("C:\\Users\\User\\Documents\\TmForever\\Tracks\\Challenges\\My CHallenges\\test.Challenge.Gbx", "wb+")
 f.write(bytes(bw.data))
 f.close()
 
 print(bw.valueHandler)
+print(g_.root_parser.valueHandler)
 
+for diff in list(dictdiffer.diff(bw.valueHandler, g_.root_parser.valueHandler)):
+    if len(str(diff[2][0])) < 111500:
+        print(diff[:2])
+        print(diff[2][0])
+        print(diff[2][1])
+
+print(hex(50823169))

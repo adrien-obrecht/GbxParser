@@ -10,7 +10,7 @@ def Chunk008(bp):
 
 
 def Chunk009(bp):
-    bp.color('lightTrailColor')
+    bp.vec3('lightTrailColor')
 
 
 def Chunk00A(bp):

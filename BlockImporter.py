@@ -7,6 +7,7 @@ import Class03078
 import Class03079
 import Class0307A
 import Class03082
+import Class03084
 import Class03092
 import Class03093
 import Class030A2
@@ -60,6 +61,8 @@ chunkLink = {0x00000000: Header.writeHead,
              0x0307A003: Class0307A.Chunk003,
 
              0x03082000: Class03082.Chunk000,
+
+             0x03084003: Class03084.Chunk003,
 
              0x03092005: Class03092.Chunk005,
              0x03092008: Class03092.Chunk008,

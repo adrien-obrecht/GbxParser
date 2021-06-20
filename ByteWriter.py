@@ -37,9 +37,9 @@ class ByteWriter:
         else:
             val = name
         if val:
-            self.uint32(1, isRef=False)
+            return self.uint32(1, isRef=False)
         else:
-            self.uint32(0, isRef=False)
+            return self.uint32(0, isRef=False)
 
     def uint16(self, name, isRef=True):
         if isRef:
@@ -104,6 +104,7 @@ class ByteWriter:
         else:
             val = name
         self.uint32(len(val), isRef=False)
+        print(val)
         if decode:
             self.data.extend(struct.pack(f'{len(val)}s', bytes(val, 'utf-8')))
             return struct.pack(f'{len(val)}s', bytes(val, 'utf-8'))
@@ -174,5 +175,12 @@ class ByteWriter:
         self.valueHandler = vH
 
     def fileRef(self, name=None):
-        self.byte(2, isRef=False)
-        self.string('', isRef=False)
+        val = self.valueHandler[self.currentChunk][name]
+        print(val, "333#")
+        version = self.byte(val['version'], isRef=False)
+        if version >= 3:
+            self.read(32, name=val['checksum'], isRef=False)
+        filePath = self.string(val['filePath'], isRef=False)
+        if len(filePath) > 0 and version >= 1:
+            self.string(val['locatorUrl'], isRef=False)
+

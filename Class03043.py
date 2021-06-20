@@ -184,7 +184,9 @@ def Chunk028(bp):
     archiveGmCamVal = bp.bool('archiveGmCamVal')
     if archiveGmCamVal:
         bp.byte('u1')
-        (bp.vec3('mat1'), bp.vec3('mat2'), bp.vec3('mat3'))
+        bp.vec3('mat1')
+        bp.vec3('mat2')
+        bp.vec3('mat3')
         bp.vec3('u2')
         bp.float('u3')
         bp.float('u4')
