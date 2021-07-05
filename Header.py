@@ -26,7 +26,7 @@ def readHead(bp):
 
     numExternalNodes = bp.uint32('numExternalNodes')
     if numExternalNodes > 0:
-        print("Num external node is not 0! ")
+        print(f"Num external node is {numExternalNodes}! ")
 
     dataSize = bp.uint32('dataSize')
     compDataSize = bp.uint32('compDataSize')
@@ -47,25 +47,26 @@ def readHead(bp):
 def _read_user_data(bp):
     entries = {}
     user_data_size = bp.uint32('userDataSize')
-    num_chunks = bp.uint32('numChunks')
-    for i in range(num_chunks):
-        cid = bp.uint32(f'{i} chunkId')
-        size = bp.uint32(f'{i} size')
-        entries[cid] = size
+    if user_data_size:
+        num_chunks = bp.uint32('numChunks')
+        for i in range(num_chunks):
+            cid = bp.uint32(f'{i} chunkId')
+            size = bp.uint32(f'{i} size')
+            entries[cid] = size
 
-    cV = bp.chunkValue
-    for cid, size in entries.items():
-        bp.chunkValue = {}
-        if cid in bi.chunkLink:
-            print(f"Reading chunk {hex(cid)}")
-            bi.chunkLink[cid](bp)
-            bp.chunkOrder.append(cid)
-            bp.valueHandler[cid] = bp.chunkValue
-        else:
-            print(f"Skiping chunk {hex(cid)}")
-            bp.skip(size)
+        cV = bp.chunkValue
+        for cid, size in entries.items():
+            bp.chunkValue = {}
+            if cid in bi.chunkLink:
+                print(f"Reading chunk {hex(cid)}")
+                bi.chunkLink[cid](bp)
+                bp.chunkOrder.append(cid)
+                bp.valueHandler[cid] = bp.chunkValue
+            else:
+                print(f"Skiping chunk {hex(cid)}")
+                bp.skip(size)
 
-    bp.chunkValue = cV
+        bp.chunkValue = cV
 
 
 def writeHead(bp):
@@ -86,7 +87,7 @@ def writeHead(bp):
 
     numExternalNodes = bp.uint32('numExternalNodes')
     if numExternalNodes > 0:
-        print("Num external node is not 0! ")
+        print(f"Num external node is {numExternalNodes}0! ")
 
     bp_ = ByteWriter()
     bp_.chunkOrder = bp.chunkOrder
@@ -103,7 +104,13 @@ def writeHead(bp):
 
 
 def _write_user_data(bp):
-    # user_data_size = bp.uint32('userDataSize')
+    try:
+        num_chunks = bp.uint32('numChunks')
+    except KeyError:
+        bp.uint32(0, isRef=False)
+        bp.chunkOrder = bp.chunkOrder[1:]
+        return
+
     bp_ = ByteWriter()
     bp_.chunkOrder = bp.chunkOrder[1:]
     bp_.valueHandler = bp.valueHandler
@@ -111,8 +118,6 @@ def _write_user_data(bp):
     bp_.storedStrings = bp.storedStrings
     bp_.nodeNames = bp.nodeNames
     bp_.currentChunk = 0
-
-    num_chunks = bp_.uint32('numChunks')
     bp_.data = bytearray()
     chunkDatas = []
     for _ in range(num_chunks):

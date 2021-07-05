@@ -6,7 +6,7 @@ def Chunk001(bp):
     for i in range(numKeys):
         bp.float(f'timeStamp {i}')
     numKeys = bp.uint32('numKeys')
-    numPoints = bp.uin32('numPoints')
+    numPoints = bp.uint32('numPoints')
     for i in range(numKeys):
         for j in range(numPoints):
             bp.vec3(f'pointPosition {i} {j}')

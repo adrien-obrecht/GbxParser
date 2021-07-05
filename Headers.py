@@ -263,3 +263,13 @@ class Block:
 
     def __repr__(self):
         return f'{self.position} {self.name} \n'
+
+
+class Point:
+    def __init__(self):
+        self.positions = []
+        self.color = (0, 0, 0)
+        self.opacity = 1
+
+    def __repr__(self):
+        return f'{self.positions=} {self.color=} {self.opacity=} \n'
