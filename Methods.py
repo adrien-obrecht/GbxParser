@@ -1,3 +1,5 @@
+import binascii
+
 from Headers import Block, Point, Vector3
 
 
@@ -15,19 +17,27 @@ def pushBlockList(bw, blockList):
 def getBlockList(bw):
     vH = bw.valueHandler[50606111]
     blockList = []
+    storedName = ""
     for i in range(vH['numBlocks']):
         b = Block()
         b.name = vH[f'blockName {i}']
         b.rotation = vH[f'rotation {i}']
         b.flags = vH[f'flags {i}']
         b.position = [vH[f'posX {i}'], vH[f'posY {i}'], vH[f'posZ {i}']]
+        if b.name == "":
+            b.name = storedName
+        storedName = b.name
         blockList.append(b)
     return blockList
 
 
 def erasePassword(bw):
-    bw.valueHandler[50606121]['CRC32'] = 1169808926
+    trackUID = bw.valueHandler[50606083]['trackUID']
+    string = f"0x00000000000000000000000000000000???{trackUID}"
+
+    bw.valueHandler[50606121]['CRC32'] = binascii.crc32(bytes(string, 'utf-8'))
     bw.valueHandler[50606121]['passwordHash'] = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+
 
 
 def getTrianglesInfo(bw):

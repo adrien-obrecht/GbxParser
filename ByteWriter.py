@@ -104,7 +104,6 @@ class ByteWriter:
         else:
             val = name
         self.uint32(len(val), isRef=False)
-        print(val)
         if decode:
             self.data.extend(struct.pack(f'{len(val)}s', bytes(val, 'utf-8')))
             return struct.pack(f'{len(val)}s', bytes(val, 'utf-8'))
@@ -136,6 +135,7 @@ class ByteWriter:
     def readNode(self):
         import BlockImporter
         cC = self.currentChunk
+        print(f"Node start {cC if cC is None else hex(cC)}")
         while True:
             self.currentChunk = self.chunkOrder[0]
             self.chunkOrder = self.chunkOrder[1:]
@@ -143,6 +143,7 @@ class ByteWriter:
 
             if self.currentChunk == 0xFACADE01:
                 self.currentChunk = cC
+                print("Encountered FACADE, end of node")
                 return
 
             if self.currentChunk in BlockImporter.skipableChunkList:
@@ -187,7 +188,6 @@ class ByteWriter:
 
     def fileRef(self, name=None):
         val = self.valueHandler[self.currentChunk][name]
-        print(val, "333#")
         version = self.byte(val['version'], isRef=False)
         if version >= 3:
             self.read(32, name=val['checksum'], isRef=False)

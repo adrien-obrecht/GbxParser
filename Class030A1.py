@@ -2,7 +2,7 @@
 
 
 def Chunk002(bp):
-    numKeys = bp.uin32('numKeys')
+    numKeys = bp.uint32('numKeys')
     for i in range(numKeys):
         bp.float(f'timeStamp {i}')
         bp.vec3(f'cameraPosition {i}')

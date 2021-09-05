@@ -81,6 +81,7 @@ def writeHead(bp):
         bp.uint32('chunkId')
 
     if version >= 6:
+        print(bp.data)
         _write_user_data(bp)
 
     bp.uint32('numNodes')
@@ -110,6 +111,8 @@ def _write_user_data(bp):
         bp.uint32(0, isRef=False)
         bp.chunkOrder = bp.chunkOrder[1:]
         return
+
+    bp.data = bp.data[:-4]
 
     bp_ = ByteWriter()
     bp_.chunkOrder = bp.chunkOrder[1:]

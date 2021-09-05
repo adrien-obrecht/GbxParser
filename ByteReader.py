@@ -54,7 +54,7 @@ class ByteReader(object):
 
         self.pos = 0
         self.seen_loopback = False
-        self.nodeIndexes = set()
+        self.nodeIndex = set()
         self.stored_strings = []
         self.nodeNames = {}
         self.current_info = PositionInfo(-1, 0)
@@ -90,9 +90,9 @@ class ByteReader(object):
 
     def nodeRef(self, name=None):
         idx = self.int32()
-        if idx >= 0 and idx not in self.nodeIndexes:
+        if idx >= 0 and idx not in self.nodeIndex:
             self.nodeNames[name] = self.uint32()
-            self.nodeIndexes.add(idx)
+            self.nodeIndex.add(idx)
             cV = self.chunkValue
             vH = self.valueHandler
             self.valueHandler = {}
@@ -317,47 +317,49 @@ class ByteReader(object):
         Returns:
             the lookback string read from the buffer
         """
-        if not self.seen_loopback:
-            self.uint32()
+        def aux(self, name, gameStrings):
+            if not self.seen_loopback:
+                self.uint32()
+
             self.seen_loopback = True
-        val = None
+            inp = self.uint32()
+            if (inp & 0xc0000000) != 0 and (inp & 0x3fffffff) == 0:
+                s = self.string()
+                self.stored_strings.append(s)
+                return s
 
-        inp = self.uint32()
-        if (inp & 0xc0000000) != 0 and (inp & 0x3fffffff) == 0:
-            s = self.string()
-            self.stored_strings.append(s)
-            val = s
+            if inp == 0:
+                s = self.string()
+                self.stored_strings.append(s)
+                return s
 
-        elif inp == 0:
-            s = self.string()
-            self.stored_strings.append(s)
-            val = s
+            if inp == -1:
+                return ''
 
-        elif inp == -1:
-            val = ''
+            if (inp & 0x3fffffff) == inp:
+                if inp == 11:
+                    return 'Valley'
+                elif inp == 12:
+                    return 'Canyon'
+                elif inp == 13:
+                    return 'Lagoon'
+                elif inp == 17:
+                    return 'TMCommon'
+                elif inp == 202:
+                    return 'Storm'
+                elif inp == 299:
+                    return 'SMCommon'
+                elif inp == 10003:
+                    return 'Common'
 
-        elif (inp & 0x3fffffff) == inp:
-            if inp == 11:
-                val = 'Valley'
-            elif inp == 12:
-                val = 'Canyon'
-            elif inp == 13:
-                val = 'Lagoon'
-            elif inp == 17:
-                val = 'TMCommon'
-            elif inp == 202:
-                val = 'Storm'
-            elif inp == 299:
-                val = 'SMCommon'
-            elif inp == 10003:
-                val = 'Common'
+            inp &= 0x3fffffff
+            if inp - 1 >= len(self.stored_strings):
+                return ''
+            return self.stored_strings[inp - 1]
 
-        elif inp & 0x3fffffff - 1 >= len(self.stored_strings):
-            val = ''
-
-        elif val is None:
-            val = self.stored_strings[inp & 0x3fffffff - 1]
+        val = aux(self, name, gameStrings)
 
         if name is not None:
             self.chunkValue[name] = val
         return val
+
