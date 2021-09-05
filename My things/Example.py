@@ -4,7 +4,6 @@ from Parser import *
 from ByteWriter import ByteWriter
 from Headers import Block, Point
 import BlockImporter
-import StadiumBlocks
 import dictdiffer
 import Methods
 
