@@ -7,8 +7,8 @@ import BlockImporter
 import dictdiffer
 import Methods
 
-name = "ESL-Hockolicious.Challenge"
-path = "C:\\Users\\User\\Documents\\TrackMania\\Tracks\\Challenges\\My Challenges"
+name = "test.Replay"
+path = "C:\\Users\\User\\Documents\\TrackMania\\Tracks\\Replays\\CreatedGhosts"
 g = Gbx(f"{path}\\{name}.Gbx")
 
 print(g.root_parser.valueHandler)
@@ -19,7 +19,7 @@ bw.chunkOrder = g.root_parser.chunkOrder
 bw.nodeNames = g.root_parser.nodeNames
 bw.currentChunk = 0
 
-Methods.erasePassword(bw)
+# Methods.erasePassword(bw)
 
 BlockImporter.chunkLink[0](bw)
 
@@ -38,8 +38,7 @@ print(g_.root_parser.valueHandler)
 
 for diff in list(dictdiffer.diff(bw.valueHandler, g_.root_parser.valueHandler)):
     if len(str(diff[2][0])) < 1500:
-        print(diff[:2])
-        print(diff[2][0])
-        print(diff[2][1])
+        print(diff)
+
 
 

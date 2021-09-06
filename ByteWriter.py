@@ -105,6 +105,10 @@ class ByteWriter:
             val = name
         self.uint32(len(val), isRef=False)
         if decode:
+            print(len(val), val, struct.pack(f'{len(val)}s', bytes(val, 'utf-8-sig')))
+        else:
+            print(len(val), val)
+        if decode:
             self.data.extend(struct.pack(f'{len(val)}s', bytes(val, 'utf-8')))
             return struct.pack(f'{len(val)}s', bytes(val, 'utf-8'))
         else:

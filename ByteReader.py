@@ -280,10 +280,10 @@ class ByteReader(object):
             if not decode:
                 val = self.read(strlen)
             else:
-                val = self.read(strlen, str(strlen) + 's').decode('utf-8')
+                val = self.read(strlen, str(strlen) + 's').decode('utf-8-sig')
         except UnicodeDecodeError as e:
-            logging.error(f'Failed to read string: {e}')
-            return None
+            print(f'Failed to read string: {e}')
+            val = None
 
         if name is not None:
             self.chunkValue[name] = val

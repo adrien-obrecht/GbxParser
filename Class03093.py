@@ -11,8 +11,9 @@ def Chunk000(bp):
         bp.string('nickname')
         if version >= 6:
             bp.string('driverLogin')
-            bp.byte('u1')
-            titleUID = bp.lookbackString('titleUID')
+            if version >= 8:
+                bp.byte('u1')
+                bp.lookbackString('titleUID')
 
 
 def Chunk001(bp):
@@ -22,11 +23,12 @@ def Chunk001(bp):
 def Chunk002(bp):
     from Parser import Gbx
     GBXSize = bp.uint32('GBXSize')
-    data = bytes(bp.read(GBXSize))
+    bp.read(GBXSize, name='data')
+    """data = bytes(bp.read(GBXSize, 'data'))
     try:
         track = Gbx(data)
     except Exception as e:
-        print(f'Failed to parse map data: {e}')
+        print(f'Failed to parse map data: {e}')"""
 
 
 def Chunk007(bp):

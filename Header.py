@@ -31,7 +31,12 @@ def readHead(bp):
     dataSize = bp.uint32('dataSize')
     compDataSize = bp.uint32('compDataSize')
     compData = bp.read(compDataSize, name='compData')
-    data = bytearray(lzo.decompress(compData, False, dataSize))
+    print(compDataSize, compData)
+    if compDataSize > 0:
+        data = bytearray(lzo.decompress(compData, False, dataSize))
+    else:
+        bp.valueHandler[0] = bp.chunkValue
+        return bytearray()
 
     bp_ = ByteReader(data)
     bp_.valueHandler = bp.valueHandler
@@ -52,6 +57,7 @@ def _read_user_data(bp):
         for i in range(num_chunks):
             cid = bp.uint32(f'{i} chunkId')
             size = bp.uint32(f'{i} size')
+            bp.chunkValue[f'{i} size'] %= 2**31  # Erase the "heavy chunk" marker
             entries[cid] = size
 
         cV = bp.chunkValue
@@ -81,7 +87,6 @@ def writeHead(bp):
         bp.uint32('chunkId')
 
     if version >= 6:
-        print(bp.data)
         _write_user_data(bp)
 
     bp.uint32('numNodes')
@@ -89,6 +94,9 @@ def writeHead(bp):
     numExternalNodes = bp.uint32('numExternalNodes')
     if numExternalNodes > 0:
         print(f"Num external node is {numExternalNodes}0! ")
+
+    if not bp.chunkOrder:
+        return
 
     bp_ = ByteWriter()
     bp_.chunkOrder = bp.chunkOrder
@@ -135,7 +143,7 @@ def _write_user_data(bp):
 
     for i in range(num_chunks):
         bp_.uint32(f'{i} chunkId')
-        if len(bytes(chunkDatas[i])) < 200:
+        if len(bytes(chunkDatas[i])) < 17000:
             bp_.uint32(len(bytes(chunkDatas[i])), isRef=False)
         else:
             bp_.uint32(len(bytes(chunkDatas[i]))+2**31, isRef=False)
