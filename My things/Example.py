@@ -7,8 +7,9 @@ import BlockImporter
 import dictdiffer
 import Methods
 
-name = "test.Replay"
-path = "C:\\Users\\User\\Documents\\TrackMania\\Tracks\\Replays\\CreatedGhosts"
+name = "test.Challenge"
+# path = "C:\\Users\\User\\Documents\\TrackMania\\Tracks\\Replays\\CreatedGhosts"
+path = "C:\\Users\\User\\Documents\\TrackMania\\Tracks\\Challenges\\My Challenges"
 g = Gbx(f"{path}\\{name}.Gbx")
 
 print(g.root_parser.valueHandler)

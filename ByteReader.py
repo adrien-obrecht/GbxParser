@@ -280,7 +280,8 @@ class ByteReader(object):
             if not decode:
                 val = self.read(strlen)
             else:
-                val = self.read(strlen, str(strlen) + 's').decode('utf-8-sig')
+                val = self.read(strlen, str(strlen) + 's').decode('utf-8')
+
         except UnicodeDecodeError as e:
             print(f'Failed to read string: {e}')
             val = None

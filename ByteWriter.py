@@ -103,15 +103,13 @@ class ByteWriter:
             val = self.valueHandler[self.currentChunk][name]
         else:
             val = name
-        self.uint32(len(val), isRef=False)
+
         if decode:
-            print(len(val), val, struct.pack(f'{len(val)}s', bytes(val, 'utf-8-sig')))
+            self.uint32(len(bytes(val, 'utf-8')), isRef=False)
+            self.data.extend(struct.pack(f"{len(bytes(val, 'utf-8'))}s", bytes(val, 'utf-8')))
+            return struct.pack(f"{len(bytes(val, 'utf-8'))}s", bytes(val, 'utf-8'))
         else:
-            print(len(val), val)
-        if decode:
-            self.data.extend(struct.pack(f'{len(val)}s', bytes(val, 'utf-8')))
-            return struct.pack(f'{len(val)}s', bytes(val, 'utf-8'))
-        else:
+            self.uint32(len(val), isRef=False)
             self.read(0, name)
 
     def lookbackString(self, name, isRef=True, gameStrings=False):
