@@ -265,7 +265,7 @@ class Block:
         return f'{self.position} {self.name} \n'
 
     def __eq__(self, other):
-        return self.name == other.NAME and self.position == other.position
+        return self.name == other.name and self.position == other.position
 
     def __hash__(self):
         return hash((self.name, self.position[0], self.position[1], self.position[2]))
