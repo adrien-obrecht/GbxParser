@@ -1,4 +1,4 @@
-"""CGameCtnMediaBlockImage"""
+"""CGameCtnMediaBlockImage 030A5"""
 
 
 def Chunk000(bp):

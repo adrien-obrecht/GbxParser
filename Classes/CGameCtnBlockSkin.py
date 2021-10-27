@@ -1,4 +1,4 @@
-"""CGameCtnBlockSkin"""
+"""CGameCtnBlockSkin 03059"""
 
 
 def Chunk002(bp):

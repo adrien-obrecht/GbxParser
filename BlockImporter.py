@@ -1,142 +1,114 @@
-import Class0301B
-import Class03024
-import Class03029
-import Class0303F
-import Class03043
-import Class03059
-import Class0305B
-import Class03078
-import Class03079
-import Class0307A
-import Class03080
-import Class03081
-import Class03082
-import Class03083
-import Class03084
-import Class03085
-import Class03092
-import Class03093
-import Class030A1
-import Class030A2
-import Class030A4
-import Class030A5
-import Class030A6
-import Class030A7
-import Class030A8
-import Class030A9
-import Class030AB
-import Class030E5
-import Class07010
-import Header
+from Classes import *
+
 
 chunkLink = {0x00000000: Header.writeHead,
 
-             0x0301B000: Class0301B.Chunk000,
+             0x0301B000: CCGameCtnCollectorList.Chunk000,
 
-             0x03024000: Class03024.Chunk000,
+             0x03024000: CGameCtnMediaBlock3dStereo.Chunk000,
 
-             0x03029001: Class03029.Chunk001,
+             0x03029001: CGameCtnMediaBlockTriangles.Chunk001,
 
-             0x0303F005: Class0303F.Chunk005,
+             0x0303F005: CGameGhost.Chunk005,
 
-             0x03043002: Class03043.Chunk002,
-             0x03043003: Class03043.Chunk003,
-             0x03043004: Class03043.Chunk004,
-             0x03043005: Class03043.Chunk005,
-             0x03043007: Class03043.Chunk007,
-             0x0304300D: Class03043.Chunk00D,
-             0x03043011: Class03043.Chunk011,
-             0x03043017: Class03043.Chunk017,
-             0x03043018: Class03043.Chunk018,
-             0x03043019: Class03043.Chunk019,
-             0x0304301C: Class03043.Chunk01C,
-             0x0304301F: Class03043.Chunk01F,
-             0x03043021: Class03043.Chunk021,
-             0x03043022: Class03043.Chunk022,
-             0x03043024: Class03043.Chunk024,
-             0x03043025: Class03043.Chunk025,
-             0x03043026: Class03043.Chunk026,
-             0x03043028: Class03043.Chunk028,
-             0x03043029: Class03043.Chunk029,
-             0x0304302A: Class03043.Chunk02A,
+             0x03043002: CGameCtnChallenge.Chunk002,
+             0x03043003: CGameCtnChallenge.Chunk003,
+             0x03043004: CGameCtnChallenge.Chunk004,
+             0x03043005: CGameCtnChallenge.Chunk005,
+             0x03043007: CGameCtnChallenge.Chunk007,
+             0x0304300D: CGameCtnChallenge.Chunk00D,
+             0x03043011: CGameCtnChallenge.Chunk011,
+             0x03043017: CGameCtnChallenge.Chunk017,
+             0x03043018: CGameCtnChallenge.Chunk018,
+             0x03043019: CGameCtnChallenge.Chunk019,
+             0x0304301C: CGameCtnChallenge.Chunk01C,
+             0x0304301F: CGameCtnChallenge.Chunk01F,
+             0x03043021: CGameCtnChallenge.Chunk021,
+             0x03043022: CGameCtnChallenge.Chunk022,
+             0x03043024: CGameCtnChallenge.Chunk024,
+             0x03043025: CGameCtnChallenge.Chunk025,
+             0x03043026: CGameCtnChallenge.Chunk026,
+             0x03043028: CGameCtnChallenge.Chunk028,
+             0x03043029: CGameCtnChallenge.Chunk029,
+             0x0304302A: CGameCtnChallenge.Chunk02A,
 
-             0x03059002: Class03059.Chunk002,
+             0x03059002: CGameCtnBlockSkin.Chunk002,
 
-             0x0305B001: Class0305B.Chunk001,
-             0x0305B004: Class0305B.Chunk004,
-             0x0305B008: Class0305B.Chunk008,
+             0x0305B001: CGameCtnChallengeParameters.Chunk001,
+             0x0305B004: CGameCtnChallengeParameters.Chunk004,
+             0x0305B008: CGameCtnChallengeParameters.Chunk008,
 
-             0x03078001: Class03078.Chunk001,
-             0x03078004: Class03078.Chunk004,
+             0x03078001: CGameCtnMediaTrack.Chunk001,
+             0x03078004: CGameCtnMediaTrack.Chunk004,
 
-             0x03079004: Class03079.Chunk004,
-             0x03079005: Class03079.Chunk005,
-             0x03079007: Class03079.Chunk007,
+             0x03079004: CGameCtnMediaClip.Chunk004,
+             0x03079005: CGameCtnMediaClip.Chunk005,
+             0x03079007: CGameCtnMediaClip.Chunk007,
 
-             0x0307A003: Class0307A.Chunk003,
+             0x0307A003: CGameCtnMediaClipGroup.Chunk003,
 
-             0x03080003: Class03080.Chunk003,
+             0x03080003: CGameCtnMediaBlockFxColors.Chunk003,
 
-             0x03081001: Class03081.Chunk001,
+             0x03081001: CGameCtnMediaBlockFxBlurDepth.Chunk001,
 
-             0x03082000: Class03082.Chunk000,
+             0x03082000: CGameCtnMediaBlockFxBlurMotion.Chunk000,
 
-             0x03083001: Class03083.Chunk001,
+             0x03083001: CGameCtnMediaBlockFxBloom.Chunk001,
 
-             0x03084003: Class03084.Chunk003,
+             0x03084003: CGameControlCameraFree.Chunk003,
 
-             0x03085000: Class03085.Chunk000,
+             0x03085000: CGameCtnMediaBlockTime.Chunk000,
 
-             0x03092005: Class03092.Chunk005,
-             0x03092008: Class03092.Chunk008,
-             0x03092009: Class03092.Chunk009,
-             0x0309200A: Class03092.Chunk00A,
-             0x0309200B: Class03092.Chunk00B,
-             0x0309200C: Class03092.Chunk00C,
-             0x0309200E: Class03092.Chunk00E,
-             0x0309200F: Class03092.Chunk00F,
-             0x03092010: Class03092.Chunk010,
-             0x03092012: Class03092.Chunk012,
-             0x03092013: Class03092.Chunk013,
-             0x03092014: Class03092.Chunk014,
-             0x03092015: Class03092.Chunk015,
-             0x03092017: Class03092.Chunk017,
-             0x03092018: Class03092.Chunk018,
-             0x03092019: Class03092.Chunk019,
+             0x03092005: CGameCtnGhost.Chunk005,
+             0x03092008: CGameCtnGhost.Chunk008,
+             0x03092009: CGameCtnGhost.Chunk009,
+             0x0309200A: CGameCtnGhost.Chunk00A,
+             0x0309200B: CGameCtnGhost.Chunk00B,
+             0x0309200C: CGameCtnGhost.Chunk00C,
+             0x0309200E: CGameCtnGhost.Chunk00E,
+             0x0309200F: CGameCtnGhost.Chunk00F,
+             0x03092010: CGameCtnGhost.Chunk010,
+             0x03092012: CGameCtnGhost.Chunk012,
+             0x03092013: CGameCtnGhost.Chunk013,
+             0x03092014: CGameCtnGhost.Chunk014,
+             0x03092015: CGameCtnGhost.Chunk015,
+             0x03092017: CGameCtnGhost.Chunk017,
+             0x03092018: CGameCtnGhost.Chunk018,
+             0x03092019: CGameCtnGhost.Chunk019,
 
-             0x03093000: Class03093.Chunk000,
-             0x03093001: Class03093.Chunk001,
-             0x03093002: Class03093.Chunk002,
-             0x03093007: Class03093.Chunk007,
-             0x03093014: Class03093.Chunk014,
+             0x03093000: CGameCtnReplayRecord.Chunk000,
+             0x03093001: CGameCtnReplayRecord.Chunk001,
+             0x03093002: CGameCtnReplayRecord.Chunk002,
+             0x03093007: CGameCtnReplayRecord.Chunk007,
+             0x03093014: CGameCtnReplayRecord.Chunk014,
 
-             0x030A1002: Class030A1.Chunk002,
+             0x030A1002: CGameCtnMediaBlockCameraPath.Chunk002,
 
-             0x030A2005: Class030A2.Chunk005,
+             0x030A2005: CGameCtnMediaBlockCameraCustom.Chunk005,
 
-             0x030A4000: Class030A4.Chunk000,
+             0x030A4000: CGameCtnMediaBlockCameraEffectShake.Chunk000,
 
-             0x030A5000: Class030A5.Chunk000,
+             0x030A5000: CGameCtnMediaBlockImage.Chunk000,
 
-             0x030A6001: Class030A6.Chunk001,
+             0x030A6001: CGameCtnMediaBlockMusicEffect.Chunk001,
 
-             0x030A7001: Class030A7.Chunk001,
-             0x030A7002: Class030A7.Chunk002,
-             0x030A7003: Class030A7.Chunk003,
-             0x030A7004: Class030A7.Chunk004,
+             0x030A7001: CGameCtnMediaBlockSound.Chunk001,
+             0x030A7002: CGameCtnMediaBlockSound.Chunk002,
+             0x030A7003: CGameCtnMediaBlockSound.Chunk003,
+             0x030A7004: CGameCtnMediaBlockSound.Chunk004,
 
-             0x030A8001: Class030A8.Chunk001,
-             0x030A8002: Class030A8.Chunk002,
+             0x030A8001: CGameCtnMediaBlockText.Chunk001,
+             0x030A8002: CGameCtnMediaBlockText.Chunk002,
 
-             0x030A9000: Class030A9.Chunk000,
+             0x030A9000: CGameCtnMediaBlockTrails.Chunk000,
 
-             0x030AB000: Class030AB.Chunk000,
+             0x030AB000: CGameCtnMediaBlockTransitionFade.Chunk000,
 
-             0x030E5001: Class030E5.Chunk001,
-             0x030E5002: Class030E5.Chunk002,
+             0x030E5001: CGameCtnMediaBlockGhost.Chunk001,
+             0x030E5002: CGameCtnMediaBlockGhost.Chunk002,
 
-             0x07010003: Class07010.Chunk003,
-             0x07010005: Class07010.Chunk005}
+             0x07010003: CControlEffectSimi.Chunk003,
+             0x07010005: CControlEffectSimi.Chunk005}
 
 skipableChunkList = {0x03043017,
                      0x03043018,

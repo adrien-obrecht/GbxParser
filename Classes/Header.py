@@ -1,9 +1,6 @@
-import time
-
 import lzo
 from ByteReader import ByteReader
 from ByteWriter import ByteWriter
-import BlockImporter as bi
 
 
 def readHead(bp):
@@ -31,7 +28,7 @@ def readHead(bp):
     dataSize = bp.uint32('dataSize')
     compDataSize = bp.uint32('compDataSize')
     compData = bp.read(compDataSize, name='compData')
-    print(compDataSize, compData)
+
     if compDataSize > 0:
         data = bytearray(lzo.decompress(compData, False, dataSize))
     else:
@@ -61,6 +58,7 @@ def _read_user_data(bp):
             entries[cid] = size
 
         cV = bp.chunkValue
+        import BlockImporter as bi
         for cid, size in entries.items():
             bp.chunkValue = {}
             if cid in bi.chunkLink:
@@ -106,7 +104,7 @@ def writeHead(bp):
     bp_.readNode()
 
     data = bytes(bp_.data)
-    compData = lzo.compress(bytes(data), 1, False)
+    compData = lzo.compress(bytes(data), 0, False)
     bp.uint32(len(data), isRef=False)
     bp.uint32(len(compData), isRef=False)
     bp.read(0, compData, isRef=False)

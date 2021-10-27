@@ -1,4 +1,4 @@
-"""CGameCtnMediaBlockCameraPath"""
+"""CGameCtnMediaBlockCameraPath 030A1"""
 
 
 def Chunk002(bp):

@@ -1,4 +1,4 @@
-"""CGameCtnMediaBlockFxColors"""
+"""CGameCtnMediaBlockFxColors 03080"""
 
 
 def Chunk003(bp):

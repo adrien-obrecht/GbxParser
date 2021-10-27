@@ -1,4 +1,4 @@
-"""CGameGhost"""
+"""CGameGhost 0303F"""
 
 import zlib
 from ByteReader import ByteReader

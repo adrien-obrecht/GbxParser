@@ -1,4 +1,4 @@
-"""CCGameCtnCollectorList"""
+"""CCGameCtnCollectorList 0301B"""
 
 
 def Chunk000(bp):

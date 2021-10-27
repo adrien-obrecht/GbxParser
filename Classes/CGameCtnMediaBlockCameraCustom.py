@@ -1,4 +1,4 @@
-"""CGameCtnMediaBlockCameraCustom"""
+"""CGameCtnMediaBlockCameraCustom 030A2"""
 
 
 def Chunk005(bp):

@@ -1,4 +1,4 @@
-"""CGameCtnChallengeParameters"""
+"""CGameCtnChallengeParameters 0305B"""
 
 
 def Chunk001(bp):

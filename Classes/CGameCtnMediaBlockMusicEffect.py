@@ -1,4 +1,4 @@
-"""CGameCtnMediaBlockMusicEffect"""
+"""CGameCtnMediaBlockMusicEffect 030A6"""
 
 
 def Chunk001(bp):

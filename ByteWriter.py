@@ -185,7 +185,6 @@ class ByteWriter:
             for (val, name) in valList:
                 val(self)
             arr.append(vH)
-        print("heyy", arr)
         self.chunkValue[arrName] = arr
 
     def fileRef(self, name=None):

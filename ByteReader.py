@@ -1,5 +1,6 @@
 import logging
 import struct
+import time
 from io import IOBase
 from Headers import Vector3, Vector2
 from os import SEEK_END
@@ -76,7 +77,6 @@ class ByteReader(object):
                 skipsize = self.uint32()
             else:
                 self.pos -= 4
-
             if chunkId in BlockImporter.chunkLink:
                 print(f"Reading chunk {hex(chunkId)}")
                 BlockImporter.chunkLink[chunkId](self)
@@ -150,7 +150,6 @@ class ByteReader(object):
             for (val, name) in valList:
                 vH[name] = val(self)
             arr.append(vH)
-        print("heyy", arr)
         self.chunkValue[arrName] = arr
 
     def fileRef(self, name=None):

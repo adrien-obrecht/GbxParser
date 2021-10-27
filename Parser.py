@@ -1,13 +1,7 @@
-import logging
 from enum import IntEnum
 
-import lzo
-import zlib
-
-import Headers as headers
 from ByteReader import ByteReader
-import BlockImporter as bi
-import Header
+import Classes.Header as Header
 
 
 class GbxType(IntEnum):

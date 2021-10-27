@@ -9,7 +9,7 @@ def pushBlockList(bw, blockList):
         bw.valueHandler[50606111][f'posX {i}'] = block.position[0]
         bw.valueHandler[50606111][f'posY {i}'] = block.position[1]
         bw.valueHandler[50606111][f'posZ {i}'] = block.position[2]
-        bw.valueHandler[50606111][f'blockName {i}'] = block.name
+        bw.valueHandler[50606111][f'blockName {i}'] = block.NAME
         bw.valueHandler[50606111][f'rotation {i}'] = block.rotation
         bw.valueHandler[50606111][f'flags {i}'] = block.flags
 

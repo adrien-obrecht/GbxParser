@@ -1,4 +1,4 @@
-"""CControlEffectSimi"""
+"""CControlEffectSimi 07010"""
 
 
 def Chunk003(bp):

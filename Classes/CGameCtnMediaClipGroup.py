@@ -1,4 +1,4 @@
-"""CGameCtnMediaClipGroup"""
+"""CGameCtnMediaClipGroup 0307A"""
 
 
 def Chunk003(bp):

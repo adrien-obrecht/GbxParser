@@ -1,4 +1,4 @@
-"""CGameCtnMediaBlock3dStereo"""
+"""CGameCtnMediaBlock3dStereo 03024"""
 
 
 def Chunk000(bp):

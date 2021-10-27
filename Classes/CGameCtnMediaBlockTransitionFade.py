@@ -1,4 +1,4 @@
-"""CGameCtnMediaBlockTransitionFade"""
+"""CGameCtnMediaBlockTransitionFade 030AB"""
 
 
 def Chunk000(bp):
