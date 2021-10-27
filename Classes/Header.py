@@ -129,6 +129,7 @@ def _write_user_data(bp):
     bp_.currentChunk = 0
     bp_.data = bytearray()
     chunkDatas = []
+    import BlockImporter as bi
     for _ in range(num_chunks):
         bp_.currentChunk = bp_.chunkOrder[0]
         bp_.chunkOrder = bp_.chunkOrder[1:]
