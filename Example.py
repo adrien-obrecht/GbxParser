@@ -16,10 +16,10 @@ g.parse_all()
 # Create an object to write data to a file
 bw = GbxWriter()
 # initalise data with what g parsed
-bw.valueHandler = g.root_parser.valueHandler
-bw.chunkOrder = g.root_parser.chunkOrder
-bw.nodeNames = g.root_parser.nodeNames
-bw.currentChunk = 0
+bw.value_handler = g.root_parser.value_handler
+bw.chunk_order = g.root_parser.chunk_order
+bw.node_names = g.root_parser.node_names
+bw.current_chunk = 0
 
 # Call the header function on the writer, which will try to write all the data in order
 BlockImporter.chunkLink[0](bw)

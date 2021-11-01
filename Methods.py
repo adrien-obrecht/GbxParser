@@ -4,18 +4,18 @@ from Headers import Block, Point, Vector3
 
 
 def pushBlockList(bw, blockList):
-    bw.valueHandler[50606111]['numBlocks'] = len(blockList)
+    bw.value_handler[50606111]['numBlocks'] = len(blockList)
     for i, block in enumerate(blockList):
-        bw.valueHandler[50606111][f'posX {i}'] = block.position[0]
-        bw.valueHandler[50606111][f'posY {i}'] = block.position[1]
-        bw.valueHandler[50606111][f'posZ {i}'] = block.position[2]
-        bw.valueHandler[50606111][f'blockName {i}'] = block.name
-        bw.valueHandler[50606111][f'rotation {i}'] = block.rotation
-        bw.valueHandler[50606111][f'flags {i}'] = block.flags
+        bw.value_handler[50606111][f'posX {i}'] = block.position[0]
+        bw.value_handler[50606111][f'posY {i}'] = block.position[1]
+        bw.value_handler[50606111][f'posZ {i}'] = block.position[2]
+        bw.value_handler[50606111][f'blockName {i}'] = block.name
+        bw.value_handler[50606111][f'rotation {i}'] = block.rotation
+        bw.value_handler[50606111][f'flags {i}'] = block.flags
 
 
 def getBlockList(bw):
-    vH = bw.valueHandler[50606111]
+    vH = bw.value_handler[50606111]
     blockList = []
     storedName = ""
     for i in range(vH['numBlocks']):
@@ -32,16 +32,15 @@ def getBlockList(bw):
 
 
 def erasePassword(bw):
-    trackUID = bw.valueHandler[50606083]['trackUID']
+    trackUID = bw.value_handler[50606083]['trackUID']
     string = f"0x00000000000000000000000000000000???{trackUID}"
 
-    bw.valueHandler[50606121]['CRC32'] = binascii.crc32(bytes(string, 'utf-8'))
-    bw.valueHandler[50606121]['passwordHash'] = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
-
+    bw.value_handler[50606121]['CRC32'] = binascii.crc32(bytes(string, 'utf-8'))
+    bw.value_handler[50606121]['passwordHash'] = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
 
 
 def getTrianglesInfo(bw):
-    vH = bw.valueHandler[50827269]['mediaTrack 0'][50823169]['mediaBlock 0'][50499585]
+    vH = bw.value_handler[50827269]['mediaTrack 0'][50823169]['mediaBlock 0'][50499585]
     numKeys = vH['numKeys']
     numPoints = vH['numPoints']
     numTriangles = vH['numTriangles']
@@ -86,4 +85,4 @@ def pushTriangleInfo(bw, pointList, timeList, triangleList):
 
     vH['u1'] = b'\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80?\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
 
-    bw.valueHandler[50827269]['mediaTrack 0'][50823169]['mediaBlock 0'][50499585] = vH
+    bw.value_handler[50827269]['mediaTrack 0'][50823169]['mediaBlock 0'][50499585] = vH

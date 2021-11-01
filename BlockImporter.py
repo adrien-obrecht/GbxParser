@@ -1,7 +1,7 @@
 from Classes import *
 
 
-chunkLink = {0x00000000: Header.writeHead,
+chunkLink = {0x00000000: Header.write_head,
 
              0x0301B000: CCGameCtnCollectorList.Chunk000,
 

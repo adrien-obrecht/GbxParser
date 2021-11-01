@@ -3,7 +3,7 @@ from GbxReader import GbxReader
 from GbxWriter import GbxWriter
 
 
-def readHead(bp):
+def read_head(bp):
     magic = bp.read(3, name='magic')
 
     if magic.decode('utf-8') != 'GBX':
@@ -32,17 +32,17 @@ def readHead(bp):
     if compDataSize > 0:
         data = bytearray(lzo.decompress(compData, False, dataSize))
     else:
-        bp.valueHandler[0] = bp.chunkValue
+        bp.value_handler[0] = bp.chunk_value
         return bytearray()
 
     bp_ = GbxReader(data)
-    bp_.valueHandler = bp.valueHandler
-    bp_.chunkOrder = bp.chunkOrder
-    bp_.nodeNames = bp.nodeNames
-    cV = bp.chunkValue
+    bp_.value_handler = bp.value_handler
+    bp_.chunk_order = bp.chunk_order
+    bp_.node_names = bp.node_names
+    cV = bp.chunk_value
     bp = bp_
     bp.readNode()
-    bp.valueHandler[0] = cV
+    bp.value_handler[0] = cV
     return data
 
 
@@ -54,26 +54,26 @@ def _read_user_data(bp):
         for i in range(num_chunks):
             cid = bp.uint32(f'{i} chunkId')
             size = bp.uint32(f'{i} size')
-            bp.chunkValue[f'{i} size'] %= 2**31  # Erase the "heavy chunk" marker
+            bp.chunk_value[f'{i} size'] %= 2 ** 31  # Erase the "heavy chunk" marker
             entries[cid] = size
 
-        cV = bp.chunkValue
+        cV = bp.chunk_value
         import BlockImporter as bi
         for cid, size in entries.items():
-            bp.chunkValue = {}
+            bp.chunk_value = {}
             if cid in bi.chunkLink:
                 print(f"Reading chunk {hex(cid)}")
                 bi.chunkLink[cid](bp)
-                bp.chunkOrder.append(cid)
-                bp.valueHandler[cid] = bp.chunkValue
+                bp.chunk_order.append(cid)
+                bp.value_handler[cid] = bp.chunk_value
             else:
                 print(f"Skiping chunk {hex(cid)}")
                 bp.skip(size)
 
-        bp.chunkValue = cV
+        bp.chunk_value = cV
 
 
-def writeHead(bp):
+def write_head(bp):
     bp.read(3, name='magic')
 
     version = bp.int16('version')
@@ -93,14 +93,14 @@ def writeHead(bp):
     if numExternalNodes > 0:
         print(f"Num external node is {numExternalNodes}0! ")
 
-    if not bp.chunkOrder:
+    if not bp.chunk_order:
         return
 
     bp_ = GbxWriter()
-    bp_.chunkOrder = bp.chunkOrder
-    bp_.valueHandler = bp.valueHandler
-    bp_.nodeNames = bp.nodeNames
-    bp_.nodeIndex = bp.nodeIndex
+    bp_.chunk_order = bp.chunk_order
+    bp_.value_handler = bp.value_handler
+    bp_.node_names = bp.node_names
+    bp_.node_index = bp.node_index
     bp_.readNode()
 
     data = bytes(bp_.data)
@@ -115,30 +115,30 @@ def _write_user_data(bp):
         num_chunks = bp.uint32('numChunks')
     except KeyError:
         bp.uint32(0, isRef=False)
-        bp.chunkOrder = bp.chunkOrder[1:]
+        bp.chunk_order = bp.chunk_order[1:]
         return
 
     bp.data = bp.data[:-4]
 
     bp_ = GbxWriter()
-    bp_.chunkOrder = bp.chunkOrder[1:]
-    bp_.valueHandler = bp.valueHandler
-    bp_.nodeIndex = bp.nodeIndex
-    bp_.storedStrings = bp.storedStrings
-    bp_.nodeNames = bp.nodeNames
-    bp_.currentChunk = 0
+    bp_.chunk_order = bp.chunk_order[1:]
+    bp_.value_handler = bp.value_handler
+    bp_.node_index = bp.node_index
+    bp_.stored_strings = bp.stored_strings
+    bp_.node_names = bp.node_names
+    bp_.current_chunk = 0
     bp_.data = bytearray()
     chunkDatas = []
     import BlockImporter as bi
     for _ in range(num_chunks):
-        bp_.currentChunk = bp_.chunkOrder[0]
-        bp_.chunkOrder = bp_.chunkOrder[1:]
-        print(f"Writing chunk {hex(bp_.currentChunk)}")
-        bi.chunkLink[bp_.currentChunk](bp_)
+        bp_.current_chunk = bp_.chunk_order[0]
+        bp_.chunk_order = bp_.chunk_order[1:]
+        print(f"Writing chunk {hex(bp_.current_chunk)}")
+        bi.chunkLink[bp_.current_chunk](bp_)
         chunkDatas += [bp_.data]
         bp_.data = bytearray()
 
-    bp_.currentChunk = 0
+    bp_.current_chunk = 0
 
     for i in range(num_chunks):
         bp_.uint32(f'{i} chunkId')
@@ -154,4 +154,4 @@ def _write_user_data(bp):
     bp.uint32(len(data) + 4, isRef=False)
     bp.uint32('numChunks')
     bp.read(0, data, isRef=False)
-    bp.chunkOrder = bp_.chunkOrder
+    bp.chunk_order = bp_.chunk_order

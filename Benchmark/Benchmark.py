@@ -28,10 +28,10 @@ def test_parse(directory, result):
         try:
             def f(g):
                 bw = GbxWriter()
-                bw.valueHandler = g.root_parser.valueHandler
-                bw.chunkOrder = g.root_parser.chunkOrder
-                bw.nodeNames = g.root_parser.nodeNames
-                bw.currentChunk = 0
+                bw.value_handler = g.root_parser.value_handler
+                bw.chunk_order = g.root_parser.chunk_order
+                bw.node_names = g.root_parser.node_names
+                bw.current_chunk = 0
                 BlockImporter.chunkLink[0](bw)
             t = timeit.timeit(lambda: f(g), number=NUMBER_OF_TEST) * 1000
         except BaseException as e:
