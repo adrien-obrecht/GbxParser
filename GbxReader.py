@@ -1,42 +1,11 @@
 import logging
 import struct
-import time
 from io import IOBase
 from Headers import Vector3, Vector2
 from os import SEEK_END
 
 
-class PositionInfo(object):
-    """
-    This classes holds information that is mainly private to
-    the Gbx class but can still be retrieved through the positions member.
-    The PositionInfo marks a specific section in the file through it's position and size.
-    """
-
-    def __init__(self, pos, size):
-        """Constructs a new PositionInfo"""
-
-        self.pos = pos
-        self.size = size
-
-    @property
-    def valid(self):
-        """Checks if the instance of the section is valid
-
-        Returns:
-            True if the instance points to a valid section in the file, False otherwise
-        """
-        return self.pos > -1 and self.size > 0
-
-
-class ByteReader(object):
-    """The ByteReader class is used by the Gbx class to read specific data types supported by the GBX file format.
-    The class provides convinience methods for reading raw types such as integers, strings and vectors, which
-    are the main data types of the GBX file format. While reading the file, the Gbx class may instantiate multiple
-    instances of ByteReader to read different parts of the file. This is because some chunks depend on the state
-    of the reader, this state can be e.g: lookback strings.
-    ByteReader accepts reading from raw bytes as well as from a file handle.
-    """
+class GbxReader(object):
 
     def __init__(self, obj):
         """Constructs a new ByteReader with the provided object.
@@ -58,7 +27,6 @@ class ByteReader(object):
         self.nodeIndex = set()
         self.stored_strings = []
         self.nodeNames = {}
-        self.current_info = PositionInfo(-1, 0)
         self.valueHandler = {}
         self.chunkValue = {}
         self.chunkOrder = []

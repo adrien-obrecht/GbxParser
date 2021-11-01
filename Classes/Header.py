@@ -1,6 +1,6 @@
 import lzo
-from ByteReader import ByteReader
-from ByteWriter import ByteWriter
+from GbxReader import GbxReader
+from GbxWriter import GbxWriter
 
 
 def readHead(bp):
@@ -35,7 +35,7 @@ def readHead(bp):
         bp.valueHandler[0] = bp.chunkValue
         return bytearray()
 
-    bp_ = ByteReader(data)
+    bp_ = GbxReader(data)
     bp_.valueHandler = bp.valueHandler
     bp_.chunkOrder = bp.chunkOrder
     bp_.nodeNames = bp.nodeNames
@@ -96,7 +96,7 @@ def writeHead(bp):
     if not bp.chunkOrder:
         return
 
-    bp_ = ByteWriter()
+    bp_ = GbxWriter()
     bp_.chunkOrder = bp.chunkOrder
     bp_.valueHandler = bp.valueHandler
     bp_.nodeNames = bp.nodeNames
@@ -120,7 +120,7 @@ def _write_user_data(bp):
 
     bp.data = bp.data[:-4]
 
-    bp_ = ByteWriter()
+    bp_ = GbxWriter()
     bp_.chunkOrder = bp.chunkOrder[1:]
     bp_.valueHandler = bp.valueHandler
     bp_.nodeIndex = bp.nodeIndex

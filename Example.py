@@ -1,5 +1,5 @@
 from Parser import *
-from ByteWriter import ByteWriter
+from GbxWriter import GbxWriter
 import BlockImporter
 
 
@@ -8,12 +8,13 @@ PATH = "C:\\Users\\User\\Documents\\TrackMania\\Tracks\\Replays\\CreatedGhosts"
 
 # Create an object that parses the given file
 g = Gbx(f"{PATH}\\{NAME}.Gbx")
+g.parse_all()
 
 # We can now modify data inside g (mostly the value handler)
 # See Methods for more examples of how to properly handle it
 
 # Create an object to write data to a file
-bw = ByteWriter()
+bw = GbxWriter()
 # initalise data with what g parsed
 bw.valueHandler = g.root_parser.valueHandler
 bw.chunkOrder = g.root_parser.chunkOrder

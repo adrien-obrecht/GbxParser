@@ -1,7 +1,7 @@
 import random
 
 from Parser import *
-from ByteWriter import ByteWriter
+from GbxWriter import GbxWriter
 from Headers import Block, Point
 import BlockImporter
 import dictdiffer
@@ -17,46 +17,43 @@ def test_parse(directory, result):
         result["nb"] += 1
 
         try:
-            g = Gbx(f"{os.getcwd()}\\{directory}\\{f}")
+            t = timeit.timeit(lambda: Gbx(f"{os.getcwd()}\\{directory}\\{f}"), number=NUMBER_OF_TEST) * 1000
         except BaseException as e:
             print(f"ERROR : {e}")
             continue
         result["parsed"] += 1
-
+        result["time_parse"] = t
+        g = Gbx(f"{os.getcwd()}\\{directory}\\{f}")
+        g.parse_all()
         try:
-            bw = ByteWriter()
-            bw.valueHandler = g.root_parser.valueHandler
-            bw.chunkOrder = g.root_parser.chunkOrder
-            bw.nodeNames = g.root_parser.nodeNames
-            bw.currentChunk = 0
-            BlockImporter.chunkLink[0](bw)
+            def f(g):
+                bw = GbxWriter()
+                bw.valueHandler = g.root_parser.valueHandler
+                bw.chunkOrder = g.root_parser.chunkOrder
+                bw.nodeNames = g.root_parser.nodeNames
+                bw.currentChunk = 0
+                BlockImporter.chunkLink[0](bw)
+            t = timeit.timeit(lambda: f(g), number=NUMBER_OF_TEST) * 1000
         except BaseException as e:
-            print(f"ERROR : {e}")
+            print(f"ERROR2 : {e}")
             continue
         result["written"] += 1
+        result["time_write"] = t
+    return result
 
 
 def time_parse(directory, r):
-    d = {"nb": 0, "parsed": 0, "written": 0}
-    d["time"] = timeit.timeit(lambda: test_parse(directory, d), number=NUMBER_OF_TEST)
-    d["time"] /= NUMBER_OF_TEST
-    d["nb"] //= NUMBER_OF_TEST
-    d["parsed"] //= NUMBER_OF_TEST
-    d["written"] //= NUMBER_OF_TEST
-    r.write(f"{directory:10} {d['nb']:10} {d['parsed']:10} {d['written']:10}\t\t\t   {d['time']:.4f}\n")
+    d = {"nb": 0, "parsed": 0, "written": 0, "discovered": 0, "time_parse": 0, "time_write": 0, "time_discovery": 0}
+    d = test_parse(directory, d)
+    d["time_parse"] /= NUMBER_OF_TEST
+    d["time_write"] /= NUMBER_OF_TEST
+    d['parsed'] /= d['nb'] / 100
+    d['written'] /= d['nb'] / 100
+    r.write(f"{directory:10} {d['nb']:10}\t\t{d['parsed']:.1f}%\t{d['time_parse']:.2f}\t\t{d['written']:.1f}%\t{d['time_write']:.2f}\n")
 
 
 r = open("results.txt", "w+")
-r.write(f"Type           Number     Parsed    Written       Time in sec\n")
+r.write(f"Type           Number       Parsed  (ms)       Written  (ms)\n")
 time_parse('Tracks', r)
 time_parse('Replays', r)
 r.close()
-
-
-
-
-
-
-
-
-

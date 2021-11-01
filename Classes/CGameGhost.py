@@ -1,11 +1,11 @@
 """CGameGhost 0303F"""
 
 import zlib
-from ByteReader import ByteReader
+from GbxReader import GbxReader
 
 
 def Chunk005(bp):
-    if isinstance(bp, ByteReader):
+    if isinstance(bp, GbxReader):
         readChunk005(bp)
     else:
         writeChunk005(bp)

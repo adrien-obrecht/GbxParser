@@ -2,7 +2,7 @@ import random
 import struct
 
 
-class ByteWriter:
+class GbxWriter:
     def __init__(self):
         self.data = bytearray()
         self.seenLookback = False
