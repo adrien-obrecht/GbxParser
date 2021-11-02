@@ -30,14 +30,14 @@ class GbxReader:
             else:
                 self.pos -= 4
             if chunkId in BlockImporter.chunkLink:
-                print(f"Reading chunk {hex(chunkId)}")
+                logging.info(f"Reading chunk {hex(chunkId)}")
                 BlockImporter.chunkLink[chunkId](self)
                 self.value_handler[chunkId] = self.chunk_value
             elif skipsize != -1:
-                print(f"Skiping chunk {hex(chunkId)}")
+                logging.info(f"Skiping chunk {hex(chunkId)}")
                 self.skip(skipsize)
             else:
-                print(f"Unknown chunk {hex(chunkId)}")
+                logging.info(f"Unknown chunk {hex(chunkId)}")
                 return
 
     def nodeRef(self, name=None):
@@ -197,7 +197,7 @@ class GbxReader:
                 val = self.read(strlen, str(strlen) + 's').decode('utf-8')
 
         except UnicodeDecodeError as e:
-            print(f'Failed to read string: {e}')
+            logging.warning(f'Failed to read string: {e}')
             val = None
 
         if name is not None:

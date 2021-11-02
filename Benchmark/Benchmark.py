@@ -1,15 +1,13 @@
-import random
-
 from Parser import *
 from GbxWriter import GbxWriter
-from Headers import Block, Point
 import BlockImporter
-import dictdiffer
-import Methods
+import logging
 import timeit
 import os
 
 NUMBER_OF_TEST = 10
+
+logging.basicConfig(format='%(asctime)s %(levelname)s : %(message)s', datefmt='%H:%M:%S', level=logging.DEBUG)
 
 
 def test_parse(directory, result):
@@ -19,7 +17,7 @@ def test_parse(directory, result):
         try:
             t = timeit.timeit(lambda: Gbx(f"{os.getcwd()}\\{directory}\\{f}"), number=NUMBER_OF_TEST) * 1000
         except BaseException as e:
-            print(f"ERROR : {e}")
+            logging.error(e)
             continue
         result["parsed"] += 1
         result["time_parse"] = t
@@ -35,7 +33,7 @@ def test_parse(directory, result):
                 BlockImporter.chunkLink[0](bw)
             t = timeit.timeit(lambda: f(g), number=NUMBER_OF_TEST) * 1000
         except BaseException as e:
-            print(f"ERROR2 : {e}")
+            logging.error(e)
             continue
         result["written"] += 1
         result["time_write"] = t

@@ -1,4 +1,5 @@
 import struct
+import logging
 
 
 class GbxWriter:
@@ -136,7 +137,7 @@ class GbxWriter:
     def readNode(self):
         import BlockImporter
         cC = self.current_chunk
-        print(f"Node start {cC if cC is None else hex(cC)}")
+        logging.info(f"Node start {cC if cC is None else hex(cC)}")
         while True:
             self.current_chunk = self.chunk_order[0]
             self.chunk_order = self.chunk_order[1:]
@@ -144,11 +145,11 @@ class GbxWriter:
 
             if self.current_chunk == 0xFACADE01:
                 self.current_chunk = cC
-                print("Encountered FACADE, end of node")
+                logging.info("Encountered FACADE, end of node")
                 return
 
             if self.current_chunk in BlockImporter.skipableChunkList:
-                print(f"Writing chunk {hex(self.current_chunk)}")
+                logging.info(f"Writing chunk {hex(self.current_chunk)}")
                 sData = self.data
                 self.data = bytearray()
                 BlockImporter.chunkLink[self.current_chunk](self)
@@ -158,10 +159,10 @@ class GbxWriter:
                 self.uint32(len(nData), isRef=False)
                 self.data.extend(nData)
             elif self.current_chunk in BlockImporter.chunkLink:
-                print(f"Writing chunk {hex(self.current_chunk)}")
+                logging.info(f"Writing chunk {hex(self.current_chunk)}")
                 BlockImporter.chunkLink[self.current_chunk](self)
             else:
-                print(f"Unknown chunk {hex(self.current_chunk)}")
+                logging.info(f"Unknown chunk {hex(self.current_chunk)}")
                 return
 
     def nodeRef(self, name=None):

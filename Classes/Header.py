@@ -1,4 +1,5 @@
 import lzo
+import logging
 from GbxReader import GbxReader
 from GbxWriter import GbxWriter
 
@@ -23,7 +24,7 @@ def read_head(bp):
 
     numExternalNodes = bp.uint32('numExternalNodes')
     if numExternalNodes > 0:
-        print(f"Num external node is {numExternalNodes}! ")
+        logging.info(f"Num external node is {numExternalNodes}! ")
 
     dataSize = bp.uint32('dataSize')
     compDataSize = bp.uint32('compDataSize')
@@ -62,12 +63,12 @@ def _read_user_data(bp):
         for cid, size in entries.items():
             bp.chunk_value = {}
             if cid in bi.chunkLink:
-                print(f"Reading chunk {hex(cid)}")
+                logging.info(f"Reading chunk {hex(cid)}")
                 bi.chunkLink[cid](bp)
                 bp.chunk_order.append(cid)
                 bp.value_handler[cid] = bp.chunk_value
             else:
-                print(f"Skiping chunk {hex(cid)}")
+                logging.info(f"Skiping chunk {hex(cid)}")
                 bp.skip(size)
 
         bp.chunk_value = cV
@@ -91,7 +92,7 @@ def write_head(bp):
 
     numExternalNodes = bp.uint32('numExternalNodes')
     if numExternalNodes > 0:
-        print(f"Num external node is {numExternalNodes}0! ")
+        logging.info(f"Num external node is {numExternalNodes}0! ")
 
     if not bp.chunk_order:
         return
@@ -133,7 +134,7 @@ def _write_user_data(bp):
     for _ in range(num_chunks):
         bp_.current_chunk = bp_.chunk_order[0]
         bp_.chunk_order = bp_.chunk_order[1:]
-        print(f"Writing chunk {hex(bp_.current_chunk)}")
+        logging.info(f"Writing chunk {hex(bp_.current_chunk)}")
         bi.chunkLink[bp_.current_chunk](bp_)
         chunkDatas += [bp_.data]
         bp_.data = bytearray()
