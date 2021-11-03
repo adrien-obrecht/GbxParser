@@ -4,11 +4,12 @@ from GbxReader import GbxReader
 from GbxWriter import GbxWriter
 
 
-def read_head(bp):
+def readHead(bp: GbxReader):
     magic = bp.read(3, name='magic')
 
     if magic.decode('utf-8') != 'GBX':
-        return "Not a Gbx file!"
+        logging.warning("Not a Gbx file!")
+        return
     version = bp.int16('version')
     bp.read(3, name='u1')
     if version >= 4:
@@ -18,7 +19,7 @@ def read_head(bp):
         bp.uint32('chunkId')
 
     if version >= 6:
-        _read_user_data(bp)
+        readUserData(bp)
 
     bp.uint32('numNodes')
 
@@ -30,24 +31,23 @@ def read_head(bp):
     compDataSize = bp.uint32('compDataSize')
     compData = bp.read(compDataSize, name='compData')
 
-    if compDataSize > 0:
-        data = bytearray(lzo.decompress(compData, False, dataSize))
-    else:
+    if compDataSize <= 0:
         bp.value_handler[0] = bp.chunk_value
-        return bytearray()
+        return
 
-    bp_ = GbxReader(data)
-    bp_.value_handler = bp.value_handler
-    bp_.chunk_order = bp.chunk_order
-    bp_.node_names = bp.node_names
-    cV = bp.chunk_value
-    bp = bp_
+    bp.freezeCurrentChunk()
+    bp.resetLookbackState()
+
+    bp.data = bytearray(lzo.decompress(compData, False, dataSize))
+    bp.pos = 0
     bp.readNode()
-    bp.value_handler[0] = cV
-    return data
+
+    bp.unfreezeCurrentChunk()
+    bp.storeCurrentChunk(0)
+    return
 
 
-def _read_user_data(bp):
+def readUserData(bp):
     entries = {}
     user_data_size = bp.uint32('userDataSize')
     if user_data_size:
@@ -62,11 +62,12 @@ def _read_user_data(bp):
         import BlockImporter as bi
         for cid, size in entries.items():
             bp.chunk_value = {}
+            bp.resetLookbackState()
             if cid in bi.chunkLink:
                 logging.info(f"Reading chunk {hex(cid)}")
                 bi.chunkLink[cid](bp)
                 bp.chunk_order.append(cid)
-                bp.value_handler[cid] = bp.chunk_value
+                bp.storeCurrentChunk(cid)
             else:
                 logging.info(f"Skiping chunk {hex(cid)}")
                 bp.skip(size)
@@ -74,7 +75,7 @@ def _read_user_data(bp):
         bp.chunk_value = cV
 
 
-def write_head(bp):
+def writeHead(bp):
     bp.read(3, name='magic')
 
     version = bp.int16('version')
@@ -86,7 +87,7 @@ def write_head(bp):
         bp.uint32('chunkId')
 
     if version >= 6:
-        _write_user_data(bp)
+        writeUserData(bp)
 
     bp.uint32('numNodes')
 
@@ -100,7 +101,6 @@ def write_head(bp):
     bp_ = GbxWriter()
     bp_.chunk_order = bp.chunk_order
     bp_.value_handler = bp.value_handler
-    bp_.node_names = bp.node_names
     bp_.node_index = bp.node_index
     bp_.readNode()
 
@@ -111,7 +111,7 @@ def write_head(bp):
     bp.read(0, compData, isRef=False)
 
 
-def _write_user_data(bp):
+def writeUserData(bp):
     try:
         num_chunks = bp.uint32('numChunks')
     except KeyError:
@@ -126,7 +126,6 @@ def _write_user_data(bp):
     bp_.value_handler = bp.value_handler
     bp_.node_index = bp.node_index
     bp_.stored_strings = bp.stored_strings
-    bp_.node_names = bp.node_names
     bp_.current_chunk = 0
     bp_.data = bytearray()
     chunkDatas = []

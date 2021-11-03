@@ -8,13 +8,29 @@ class GbxWriter:
         self.seen_lookback = False
         self.value_handler = {}
         self.chunk_order = []
-        self.node_names = {}
         self.node_index = 1
         self.stored_strings = []
         self.current_chunk = None
+        self.frozen_chunks = []
 
     def __repr__(self):
         return self.data.hex()
+
+    def resetLookbackState(self):
+        self.seen_lookback = False
+        self.stored_strings = []
+
+    def freezeCurrentChunk(self):
+        d = {'data': self.data, 'current_chunk': self.current_chunk}
+        self.frozen_chunks.append(d)
+
+    def unfreezeCurrentChunk(self):
+        if not self.frozen_chunks:
+            logging.warning("No chunks where frozen")
+            return
+        d = self.frozen_chunks.pop()
+        self.data = d['data']
+        self.current_chunk = d['current_chunk']
 
     def uint32(self, name, isRef=True):
         if isRef:
@@ -167,11 +183,11 @@ class GbxWriter:
 
     def nodeRef(self, name=None):
         vH = self.value_handler
-        self.value_handler = self.value_handler[self.current_chunk][name]
-        if self.value_handler is not None:
+        if self.value_handler[self.current_chunk][name] is not None:
             self.int32(self.node_index, isRef=False)
             self.node_index += 1
-            self.uint32(self.node_names[name], isRef=False)
+            self.uint32(self.value_handler[self.current_chunk][name + "Id"], isRef=False)
+            self.value_handler = self.value_handler[self.current_chunk][name]
             self.readNode()
         else:
             self.int32(-1, isRef=False)

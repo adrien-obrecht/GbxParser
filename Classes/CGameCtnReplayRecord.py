@@ -21,12 +21,11 @@ def Chunk001(bp):
 
 
 def Chunk002(bp):
-    from Parser import Gbx
     GBXSize = bp.uint32('GBXSize')
     bp.read(GBXSize, name='data')
     """data = bytes(bp.read(GBXSize, 'data'))
     try:
-        track = Gbx(data)
+        track = GbxReader(data)
     except Exception as e:
         print(f'Failed to parse map data: {e}')"""
 

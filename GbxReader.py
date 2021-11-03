@@ -1,19 +1,47 @@
 import logging
 import struct
 from Headers import Vector3, Vector2
+import os
 
 
 class GbxReader:
     def __init__(self, data):
-        self.data = data
+        if os.path.isfile(data):
+            f = open(data, 'rb')
+            self.data = f.read()
+        else:
+            self.data = data
         self.pos = 0
-        self.seen_loopback = False
+        self.frozen_chunks = []
+        self.seen_lookback = False
         self.node_index = set()
         self.stored_strings = []
-        self.node_names = {}
         self.value_handler = {}
         self.chunk_value = {}
         self.chunk_order = []
+
+    def parseAll(self):
+        import Classes.Header
+        self.chunk_order = [0]
+        Classes.Header.readHead(self)
+
+    def resetLookbackState(self):
+        self.seen_lookback = False
+        self.stored_strings = []
+
+    def freezeCurrentChunk(self):
+        d = {'data': self.data, 'pos': self.pos, 'chunk_value': self.chunk_value}
+        self.chunk_value = {}
+        self.frozen_chunks.append(d)
+
+    def unfreezeCurrentChunk(self):
+        if not self.frozen_chunks:
+            logging.warning("No chunks where frozen")
+            return
+        d = self.frozen_chunks.pop()
+        self.data = d['data']
+        self.pos = d['pos']
+        self.chunk_value = d['chunk_value']
 
     def readNode(self):
         import BlockImporter
@@ -43,7 +71,8 @@ class GbxReader:
     def nodeRef(self, name=None):
         idx = self.int32()
         if idx >= 0 and idx not in self.node_index:
-            self.node_names[name] = self.uint32()
+            id = self.uint32()
+            self.chunk_value[name + "Id"] = id
             self.node_index.add(idx)
             cV = self.chunk_value
             vH = self.value_handler
@@ -58,6 +87,9 @@ class GbxReader:
         if name is not None:
             self.chunk_value[name] = val
         return val
+
+    def storeCurrentChunk(self, name):
+        self.value_handler[name] = self.chunk_value
 
     def read(self, num_bytes, typestr=None, name=None):
         val = bytes(self.data[self.pos:self.pos + num_bytes])
@@ -233,10 +265,10 @@ class GbxReader:
             the lookback string read from the buffer
         """
         def aux(self, name, gameStrings):
-            if not self.seen_loopback:
+            if not self.seen_lookback:
                 self.uint32()
 
-            self.seen_loopback = True
+            self.seen_lookback = True
             inp = self.uint32()
             if (inp & 0xc0000000) != 0 and (inp & 0x3fffffff) == 0:
                 s = self.string()
