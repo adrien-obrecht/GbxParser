@@ -1,7 +1,8 @@
-import logging
-import struct
 from Headers import Vector3, Vector2
+import logging
 import os
+
+import struct
 
 
 class GbxReader:
@@ -20,87 +21,20 @@ class GbxReader:
         self.chunk_value = {}
         self.chunk_order = []
 
-    def parseAll(self):
-        import Classes.Header
-        self.chunk_order = [0]
-        Classes.Header.readHead(self)
-
-    def resetLookbackState(self):
-        self.seen_lookback = False
-        self.stored_strings = []
-
-    def freezeCurrentChunk(self):
-        d = {'data': self.data, 'pos': self.pos, 'chunk_value': self.chunk_value}
-        self.chunk_value = {}
-        self.frozen_chunks.append(d)
-
-    def unfreezeCurrentChunk(self):
-        if not self.frozen_chunks:
-            logging.warning("No chunks where frozen")
-            return
-        d = self.frozen_chunks.pop()
-        self.data = d['data']
-        self.pos = d['pos']
-        self.chunk_value = d['chunk_value']
-
-    def readNode(self):
-        import BlockImporter
-        while True:
-            self.chunk_value = {}
-            chunkId = self.uint32()
-            self.chunk_order.append(chunkId)
-            if chunkId == 0xFACADE01:
-                return
-            skipsize = -1
-            skip = self.int32()
-            if skip == 0x534B4950:
-                skipsize = self.uint32()
-            else:
-                self.pos -= 4
-            if chunkId in BlockImporter.chunkLink:
-                logging.info(f"Reading chunk {hex(chunkId)}")
-                BlockImporter.chunkLink[chunkId](self)
-                self.value_handler[chunkId] = self.chunk_value
-            elif skipsize != -1:
-                logging.info(f"Skiping chunk {hex(chunkId)}")
-                self.skip(skipsize)
-            else:
-                logging.info(f"Unknown chunk {hex(chunkId)}")
-                return
-
-    def nodeRef(self, name=None):
-        idx = self.int32()
-        if idx >= 0 and idx not in self.node_index:
-            id = self.uint32()
-            self.chunk_value[name + "Id"] = id
-            self.node_index.add(idx)
-            cV = self.chunk_value
-            vH = self.value_handler
-            self.value_handler = {}
-            self.readNode()
-            vH, self.value_handler = self.value_handler, vH
-            self.chunk_value = cV
-            val = vH
-        else:
-            val = None
+    def bool(self, name=None):
+        val = self.uint32() == 1
 
         if name is not None:
             self.chunk_value[name] = val
         return val
 
-    def storeCurrentChunk(self, name):
-        self.value_handler[name] = self.chunk_value
-
-    def read(self, num_bytes, typestr=None, name=None):
-        val = bytes(self.data[self.pos:self.pos + num_bytes])
-        self.pos += num_bytes
-        if typestr is not None:
-            try:
-                val = struct.unpack(typestr, val)[0]
-            except Exception as e:
-                logging.error(e)
-                return 0
-
+    def byte(self, name=None):
+        """Reads a single byte from the buffer.
+        Returns:
+            the single byte read from the buffer
+        """
+        val = self.data[self.pos]
+        self.pos += 1
         if name is not None:
             self.chunk_value[name] = val
         return val
@@ -129,34 +63,21 @@ class GbxReader:
             self.chunk_value[name] = {'version' : version, 'checksum': checkSum, 'filePath': filePath, 'locatorUrl': locatorUrl}
         return checkSum, filePath, locatorUrl
 
-    def int32(self, name=None):
-        """Reads a signed int32.
+    def float(self, name=None):
+        """Reads a 32 bit float.
 
         Returns:
-            the integer read from the buffer
+            the float read from the buffer
         """
-        val = self.read(4, 'i')
+        val = self.read(4, 'f')
         if name is not None:
             self.chunk_value[name] = val
         return val
 
-    def bool(self, name=None):
-        val = self.uint32() == 1
-
-        if name is not None:
-            self.chunk_value[name] = val
-        return val
-
-    def uint32(self, name=None):
-        """Reads an unsigned int32.
-
-        Returns:
-            the integer read from the buffer
-        """
-        val = self.read(4, 'I')
-        if name is not None:
-            self.chunk_value[name] = val
-        return val
+    def freezeCurrentChunk(self):
+        d = {'data': self.data, 'pos': self.pos, 'chunk_value': self.chunk_value}
+        self.chunk_value = {}
+        self.frozen_chunks.append(d)
 
     def int16(self, name=None):
         """Reads a signed int16.
@@ -169,13 +90,13 @@ class GbxReader:
             self.chunk_value[name] = val
         return val
 
-    def uint16(self, name=None):
-        """Reads an unsigned int16.
+    def int32(self, name=None):
+        """Reads a signed int32.
 
         Returns:
             the integer read from the buffer
         """
-        val = self.read(2, 'H')
+        val = self.read(4, 'i')
         if name is not None:
             self.chunk_value[name] = val
         return val
@@ -190,69 +111,6 @@ class GbxReader:
         if name is not None:
             self.chunk_value[name] = val
         return val
-
-    def float(self, name=None):
-        """Reads a 32 bit float.
-
-        Returns:
-            the float read from the buffer
-        """
-        val = self.read(4, 'f')
-        if name is not None:
-            self.chunk_value[name] = val
-        return val
-
-    def vec3(self, name=None):
-        val = Vector3(self.float(), self.float(), self.float())
-
-        if name is not None:
-            self.chunk_value[name] = val
-        return val
-
-    def vec2(self, name=None):
-        val = Vector2(self.float(), self.float())
-
-        if name is not None:
-            self.chunk_value[name] = val
-        return val
-
-    def string(self, name=None, decode=True):
-        """Reads a string from the buffer, first reading the length, then it's data.
-        Returns:
-            the string read from the buffer, None if there was an error
-        """
-        strlen = self.uint32()
-        try:
-            if not decode:
-                val = self.read(strlen)
-            else:
-                val = self.read(strlen, str(strlen) + 's').decode('utf-8')
-
-        except UnicodeDecodeError as e:
-            logging.warning(f'Failed to read string: {e}')
-            val = None
-
-        if name is not None:
-            self.chunk_value[name] = val
-        return val
-
-    def byte(self, name=None):
-        """Reads a single byte from the buffer.
-        Returns:
-            the single byte read from the buffer
-        """
-        val = self.data[self.pos]
-        self.pos += 1
-        if name is not None:
-            self.chunk_value[name] = val
-        return val
-
-    def skip(self, num_bytes):
-        """Skips provided amount of bytes in the buffer
-        Args:
-            num_bytes (int): the number of bytes to skip
-        """
-        self.pos += num_bytes
 
     def lookbackString(self, name=None, gameStrings=False):
         """Reads a special string type in the GBX file format called the lookbackstring.
@@ -310,3 +168,145 @@ class GbxReader:
             self.chunk_value[name] = val
         return val
 
+    def nodeRef(self, name=None):
+        idx = self.int32()
+        if idx >= 0 and idx not in self.node_index:
+            id = self.uint32()
+            self.chunk_value[name + "Id"] = id
+            self.node_index.add(idx)
+            cV = self.chunk_value
+            vH = self.value_handler
+            self.value_handler = {}
+            self.readNode()
+            vH, self.value_handler = self.value_handler, vH
+            self.chunk_value = cV
+            val = vH
+        else:
+            val = None
+
+        if name is not None:
+            self.chunk_value[name] = val
+        return val
+
+    def parseAll(self):
+        import Classes.Header
+        self.chunk_order = [0]
+        Classes.Header.readHead(self)
+
+    def read(self, num_bytes, typestr=None, name=None):
+        val = bytes(self.data[self.pos:self.pos + num_bytes])
+        self.pos += num_bytes
+        if typestr is not None:
+            try:
+                val = struct.unpack(typestr, val)[0]
+            except Exception as e:
+                logging.error(e)
+                return 0
+
+        if name is not None:
+            self.chunk_value[name] = val
+        return val
+
+    def readNode(self):
+        import BlockImporter
+        while True:
+            self.chunk_value = {}
+            chunkId = self.uint32()
+            self.chunk_order.append(chunkId)
+            if chunkId == 0xFACADE01:
+                return
+            skipsize = -1
+            skip = self.int32()
+            if skip == 0x534B4950:
+                skipsize = self.uint32()
+            else:
+                self.pos -= 4
+            if chunkId in BlockImporter.chunkLink:
+                logging.info(f"Reading chunk {hex(chunkId)}")
+                BlockImporter.chunkLink[chunkId](self)
+                self.value_handler[chunkId] = self.chunk_value
+            elif skipsize != -1:
+                logging.info(f"Skiping chunk {hex(chunkId)}")
+                self.skip(skipsize)
+            else:
+                logging.info(f"Unknown chunk {hex(chunkId)}")
+                return
+
+    def resetLookbackState(self):
+        self.seen_lookback = False
+        self.stored_strings = []
+
+    def skip(self, num_bytes):
+        """Skips provided amount of bytes in the buffer
+        Args:
+            num_bytes (int): the number of bytes to skip
+        """
+        self.pos += num_bytes
+
+    def storeCurrentChunk(self, name):
+        self.value_handler[name] = self.chunk_value
+
+    def string(self, name=None, decode=True):
+        """Reads a string from the buffer, first reading the length, then it's data.
+        Returns:
+            the string read from the buffer, None if there was an error
+        """
+        strlen = self.uint32()
+        try:
+            if not decode:
+                val = self.read(strlen)
+            else:
+                val = self.read(strlen, str(strlen) + 's').decode('utf-8')
+
+        except UnicodeDecodeError as e:
+            logging.warning(f'Failed to read string: {e}')
+            val = None
+
+        if name is not None:
+            self.chunk_value[name] = val
+        return val
+
+    def uint16(self, name=None):
+        """Reads an unsigned int16.
+
+        Returns:
+            the integer read from the buffer
+        """
+        val = self.read(2, 'H')
+        if name is not None:
+            self.chunk_value[name] = val
+        return val
+
+    def uint32(self, name=None):
+        """Reads an unsigned int32.
+
+        Returns:
+            the integer read from the buffer
+        """
+        val = self.read(4, 'I')
+        if name is not None:
+            self.chunk_value[name] = val
+        return val
+
+    def unfreezeCurrentChunk(self):
+        if not self.frozen_chunks:
+            logging.warning("No chunks where frozen")
+            return
+        d = self.frozen_chunks.pop()
+        self.data = d['data']
+        self.pos = d['pos']
+        self.chunk_value = d['chunk_value']
+
+    def vec2(self, name=None):
+        val = Vector2(self.float(), self.float())
+
+        if name is not None:
+            self.chunk_value[name] = val
+        return val
+
+    def vec3(self, name=None):
+        val = Vector3(self.float(), self.float(), self.float())
+
+        if name is not None:
+            self.chunk_value[name] = val
+        return val

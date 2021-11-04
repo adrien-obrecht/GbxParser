@@ -1,6 +1,5 @@
 from GbxWriter import GbxWriter
 from GbxReader import GbxReader
-import BlockImporter
 import logging
 import timeit
 import os
@@ -28,8 +27,7 @@ def test_parse(directory, result):
                 bw = GbxWriter()
                 bw.value_handler = g.value_handler
                 bw.chunk_order = g.chunk_order
-                bw.current_chunk = 0
-                BlockImporter.chunkLink[0](bw)
+                bw.writeAll()
             t = timeit.timeit(lambda: f(g), number=NUMBER_OF_TESTS) * 1000
         except BaseException as e:
             logging.error(e)
