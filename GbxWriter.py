@@ -1,5 +1,6 @@
 import struct
 import logging
+from ChunkID import Id
 
 
 class GbxWriter:
@@ -32,6 +33,19 @@ class GbxWriter:
         else:
             val = name
         self.data.extend(bytes([val]))
+        return val
+
+    def chunkId(self, name, isRef=True):
+        if isRef:
+            val = self.value_handler[self.current_chunk][name]
+        else:
+            val = name
+
+        if not isinstance(val, Id):
+            logging.error(f"Provided val {val} is not a correct chunkId")
+            return
+        val = val.value
+        self.data.extend(struct.pack('I', val))
         return val
 
     def fileRef(self, name=None):
@@ -100,7 +114,7 @@ class GbxWriter:
         if self.value_handler[self.current_chunk][name] is not None:
             self.int32(self.node_index, isRef=False)
             self.node_index += 1
-            self.uint32(self.value_handler[self.current_chunk][name + "Id"], isRef=False)
+            self.chunkId(self.value_handler[self.current_chunk][name + "Id"], isRef=False)
             self.value_handler = self.value_handler[self.current_chunk][name]
             self.readNode()
         else:
@@ -118,32 +132,32 @@ class GbxWriter:
     def readNode(self):
         import BlockImporter
         cC = self.current_chunk
-        logging.info(f"Node start {cC if cC is None else hex(cC)}")
+        logging.info(f"Node start {cC}")
         while True:
             self.current_chunk = self.chunk_order[0]
             self.chunk_order = self.chunk_order[1:]
-            self.uint32(self.current_chunk, isRef=False)
+            self.chunkId(self.current_chunk, isRef=False)
 
-            if self.current_chunk == 0xFACADE01:
+            if self.current_chunk.value == 0xFACADE01:
                 self.current_chunk = cC
                 logging.info("Encountered FACADE, end of node")
                 return
 
-            if self.current_chunk in BlockImporter.skipableChunkList:
-                logging.info(f"Writing chunk {hex(self.current_chunk)}")
+            if self.current_chunk.value in BlockImporter.skipableChunkList:
+                logging.info(f"Writing chunk {self.current_chunk}")
                 sData = self.data
                 self.data = bytearray()
-                BlockImporter.chunkLink[self.current_chunk](self)
+                BlockImporter.chunkLink[self.current_chunk.value](self)
                 nData = self.data
                 self.data = sData
                 self.uint32(0x534B4950, isRef=False)
                 self.uint32(len(nData), isRef=False)
                 self.data.extend(nData)
-            elif self.current_chunk in BlockImporter.chunkLink:
-                logging.info(f"Writing chunk {hex(self.current_chunk)}")
-                BlockImporter.chunkLink[self.current_chunk](self)
+            elif self.current_chunk.value in BlockImporter.chunkLink:
+                logging.info(f"Writing chunk {self.current_chunk}")
+                BlockImporter.chunkLink[self.current_chunk.value](self)
             else:
-                logging.info(f"Unknown chunk {hex(self.current_chunk)}")
+                logging.info(f"Unknown chunk {self.current_chunk}")
                 return
 
     def resetLookbackState(self):

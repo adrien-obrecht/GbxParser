@@ -1,4 +1,5 @@
 from Headers import Vector3, Vector2
+from ChunkID import Id
 import logging
 import os
 
@@ -40,6 +41,16 @@ class GbxReader:
             self.chunk_value[name] = val
         return val
 
+    def chunkId(self, name=None):
+        val = self.read(4, 'I')
+        if not Id.intIsId(val):
+            logging.error(f"Unknown chunkId {val}")
+            return
+        chunkId = Id(val)
+        if name is not None:
+            self.chunk_value[name] = chunkId
+        return chunkId
+
     def color(self, name=None):
         val = self.float(), self.float(), self.float()
 
@@ -61,7 +72,8 @@ class GbxReader:
             locatorUrl = None
 
         if name is not None:
-            self.chunk_value[name] = {'version' : version, 'checksum': checkSum, 'filePath': filePath, 'locatorUrl': locatorUrl}
+            self.chunk_value[name] = {'version': version, 'checksum': checkSum, 'filePath': filePath,
+                                      'locatorUrl': locatorUrl}
         return checkSum, filePath, locatorUrl
 
     def float(self, name=None):
@@ -142,7 +154,7 @@ class GbxReader:
     def nodeRef(self, name=None):
         idx = self.int32()
         if idx >= 0 and idx not in self.node_index:
-            id = self.uint32()
+            id = self.chunkId()
             self.chunk_value[name + "Id"] = id
             self.node_index.add(idx)
             cV = self.chunk_value
@@ -182,27 +194,27 @@ class GbxReader:
         import BlockImporter
         while True:
             self.chunk_value = {}
-            chunkId = self.uint32()
+            chunkId = self.chunkId()
             self.chunk_order.append(chunkId)
-            if chunkId == 0xFACADE01:
+            if chunkId == Id['Facade']:
                 return
             skipsize = -1
             skip = self.int32()
             if skip == 0x534B4950:
-                if chunkId not in BlockImporter.skipableChunkList:
-                    logging.error(f"Chunk {hex(chunkId)} should be in skipableChunkList!")
+                if chunkId.value not in BlockImporter.skipableChunkList:
+                    logging.error(f"Chunk {chunkId} should be in skipableChunkList!")
                 skipsize = self.uint32()
             else:
                 self.pos -= 4
-            if chunkId in BlockImporter.chunkLink:
-                logging.info(f"Reading chunk {hex(chunkId)}")
-                BlockImporter.chunkLink[chunkId](self)
+            if chunkId.value in BlockImporter.chunkLink:
+                logging.info(f"Reading chunk {chunkId}")
+                BlockImporter.chunkLink[chunkId.value](self)
                 self.value_handler[chunkId] = self.chunk_value
             elif skipsize != -1:
-                logging.info(f"Skiping chunk {hex(chunkId)}")
+                logging.info(f"Skiping chunk {chunkId}")
                 self.skip(skipsize)
             else:
-                logging.info(f"Unknown chunk {hex(chunkId)}")
+                logging.info(f"Unknown chunk {chunkId}")
                 return
 
     def resetLookbackState(self):

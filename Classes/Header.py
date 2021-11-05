@@ -53,7 +53,7 @@ def readUserData(bp):
     if user_data_size:
         num_chunks = bp.uint32('numChunks')
         for i in range(num_chunks):
-            cid = bp.uint32(f'{i} chunkId')
+            cid = bp.chunkId(f'{i} chunkId')
             size = bp.uint32(f'{i} size')
             bp.chunk_value[f'{i} size'] %= 2 ** 31  # Erase the "heavy chunk" marker
             entries[cid] = size
@@ -63,13 +63,13 @@ def readUserData(bp):
         for cid, size in entries.items():
             bp.chunk_value = {}
             bp.resetLookbackState()
-            if cid in bi.chunkLink:
-                logging.info(f"Reading chunk {hex(cid)}")
-                bi.chunkLink[cid](bp)
+            if cid.value in bi.chunkLink:
+                logging.info(f"Reading chunk {cid}")
+                bi.chunkLink[cid.value](bp)
                 bp.chunk_order.append(cid)
                 bp.storeCurrentChunk(cid)
             else:
-                logging.info(f"Skiping chunk {hex(cid)}")
+                logging.info(f"Skiping chunk {cid}")
                 bp.skip(size)
 
         bp.chunk_value = cV
@@ -133,15 +133,15 @@ def writeUserData(bp):
     for _ in range(num_chunks):
         bp_.current_chunk = bp_.chunk_order[0]
         bp_.chunk_order = bp_.chunk_order[1:]
-        logging.info(f"Writing chunk {hex(bp_.current_chunk)}")
-        bi.chunkLink[bp_.current_chunk](bp_)
+        logging.info(f"Writing chunk {bp_.current_chunk}")
+        bi.chunkLink[bp_.current_chunk.value](bp_)
         chunkDatas += [bp_.data]
         bp_.data = bytearray()
 
     bp_.current_chunk = 0
 
     for i in range(num_chunks):
-        bp_.uint32(f'{i} chunkId')
+        bp_.chunkId(f'{i} chunkId')
         if len(bytes(chunkDatas[i])) < 17000:
             bp_.uint32(len(bytes(chunkDatas[i])), isRef=False)
         else:
