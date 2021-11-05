@@ -1,6 +1,5 @@
 from Classes import *
 
-
 chunkLink = {0x00000000: Header.writeHead,
 
              0x0301B000: CCGameCtnCollectorList.Chunk000,
@@ -115,4 +114,13 @@ skipableChunkList = {0x03043017,
                      0x03043019,
                      0x0304301C,
                      0x03043029,
+                     0x03092005,
+                     0x03092008,
+                     0x03092009,
+                     0x0309200a,
+                     0x0309200b,
+                     0x03092013,
+                     0x03092014,
+                     0x03092017,
+                     0x03093007
                      }

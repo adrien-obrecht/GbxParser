@@ -15,6 +15,7 @@ class GbxReader:
         self.pos = 0
         self.frozen_chunks = []
         self.seen_lookback = False
+        self.lookback_history = []
         self.node_index = set()
         self.stored_strings = []
         self.value_handler = {}
@@ -112,61 +113,31 @@ class GbxReader:
             self.chunk_value[name] = val
         return val
 
-    def lookbackString(self, name=None, gameStrings=False):
-        """Reads a special string type in the GBX file format called the lookbackstring.
+    def lookbackString(self, name=None):
+        if not self.seen_lookback:
+            self.uint32()
+        self.seen_lookback = True
 
-        Such type is used to reference already read strings, or introduce them if they were not
-        read yet. A ByteReader instance keeps track of lookback strings previously read and
-        returns an already existing string, if the data references it. For more information,
-        see the lookbackstring type in the GBX file format: https://wiki.xaseco.org/wiki/GBX.
-        Returns:
-            the lookback string read from the buffer
-        """
-        def aux(self, name, gameStrings):
-            if not self.seen_lookback:
-                self.uint32()
+        inp = self.uint32()
+        b31 = (inp >> 30) & 1
+        b32 = (inp >> 31) & 1
+        index = inp & 0x3fffffff
 
-            self.seen_lookback = True
-            inp = self.uint32()
-            if (inp & 0xc0000000) != 0 and (inp & 0x3fffffff) == 0:
+        if not (b31 or b32):
+            logging.error("Unhandled case! CollectionId not finished.")
+            s = index
+        elif b31 ^ b32:
+            if index == 0:
                 s = self.string()
                 self.stored_strings.append(s)
-                return s
-
-            if inp == 0:
-                s = self.string()
-                self.stored_strings.append(s)
-                return s
-
-            if inp == -1:
-                return ''
-
-            if (inp & 0x3fffffff) == inp:
-                if inp == 11:
-                    return 'Valley'
-                elif inp == 12:
-                    return 'Canyon'
-                elif inp == 13:
-                    return 'Lagoon'
-                elif inp == 17:
-                    return 'TMCommon'
-                elif inp == 202:
-                    return 'Storm'
-                elif inp == 299:
-                    return 'SMCommon'
-                elif inp == 10003:
-                    return 'Common'
-
-            inp &= 0x3fffffff
-            if inp - 1 >= len(self.stored_strings):
-                return ''
-            return self.stored_strings[inp - 1]
-
-        val = aux(self, name, gameStrings)
-
+            else:
+                s = self.stored_strings[index - 1]
+        else:
+            s = ''
+        self.lookback_history.append([bin(inp), s])
         if name is not None:
-            self.chunk_value[name] = val
-        return val
+            self.chunk_value[name] = s
+        return s
 
     def nodeRef(self, name=None):
         idx = self.int32()
@@ -218,6 +189,8 @@ class GbxReader:
             skipsize = -1
             skip = self.int32()
             if skip == 0x534B4950:
+                if chunkId not in BlockImporter.skipableChunkList:
+                    logging.error(f"Chunk {hex(chunkId)} should be in skipableChunkList!")
                 skipsize = self.uint32()
             else:
                 self.pos -= 4

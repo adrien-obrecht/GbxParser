@@ -75,7 +75,7 @@ def Chunk004(bp):
 
 
 def Chunk005(bp):
-    bp.string('XML', decode=False)
+    bp.string('XML')
 
 
 def Chunk007(bp):

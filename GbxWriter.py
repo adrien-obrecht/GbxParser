@@ -76,7 +76,8 @@ class GbxWriter:
             val = name
         self.data.extend(struct.pack('b', val))
 
-    def lookbackString(self, name, isRef=True, gameStrings=False):
+    def lookbackString(self, name, isRef=True):
+        # TODO: Is setting every lookback string to local name (bit 30 set) sufficient?
         if isRef:
             val = self.value_handler[self.current_chunk][name]
         else:
@@ -86,9 +87,13 @@ class GbxWriter:
             self.seen_lookback = True
         if val == '':
             self.uint32(2 ** 32 - 1, isRef=False)
-        else:
-            self.uint32(2**30, isRef=False)
+        elif val not in self.stored_strings:
+            self.uint32(2 ** 30, isRef=False)
+            self.stored_strings.append(val)
             self.string(val, isRef=False)
+        else:
+            idx = self.stored_strings.index(val) + 1
+            self.uint32(2 ** 30 + idx, isRef=False)
 
     def nodeRef(self, name=None):
         vH = self.value_handler
@@ -156,6 +161,7 @@ class GbxWriter:
         else:
             val = name
 
+        # TODO: Clean this up
         if decode:
             self.uint32(len(bytes(val, 'utf-8')), isRef=False)
             self.data.extend(struct.pack(f"{len(bytes(val, 'utf-8'))}s", bytes(val, 'utf-8')))
