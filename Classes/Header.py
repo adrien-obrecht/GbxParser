@@ -16,7 +16,7 @@ def readHead(bp: GbxReader):
         bp.byte('u2')
 
     if version >= 3:
-        bp.uint32('chunkId')
+        bp.chunkId('chunkId')
 
     if version >= 6:
         readUserData(bp)
@@ -84,7 +84,7 @@ def writeHead(bp):
         bp.byte('u2')
 
     if version >= 3:
-        bp.uint32('chunkId')
+        bp.chunkId('chunkId')
 
     if version >= 6:
         writeUserData(bp)

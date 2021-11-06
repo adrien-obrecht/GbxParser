@@ -1,5 +1,6 @@
-from Headers import Vector3, Vector2
 from ChunkID import Id
+from Containers import Array, Vector2, Vector3, List
+from collections import OrderedDict
 import logging
 import os
 
@@ -19,7 +20,7 @@ class GbxReader:
         self.lookback_history = []
         self.node_index = set()
         self.stored_strings = []
-        self.value_handler = {}
+        self.value_handler = OrderedDict()
         self.chunk_value = {}
         self.chunk_order = []
 
@@ -40,6 +41,29 @@ class GbxReader:
         if name is not None:
             self.chunk_value[name] = val
         return val
+
+    def customArray(self, length, arg_list, name=None):
+        l = Array()
+        for _ in range(length):
+            d = {}
+            for (f, el_name) in arg_list:
+                d[el_name] = f(self)()
+            l.add(d)
+        if name is not None:
+            self.chunk_value[name] = l
+        return l
+
+    def customList(self, arg_list, name=None):
+        l = List()
+        length = self.uint32()
+        for _ in range(length):
+            d = {}
+            for (f, el_name) in arg_list:
+                d[el_name] = f(self)()
+            l.add(d)
+        if name is not None:
+            self.chunk_value[name] = l
+        return l
 
     def chunkId(self, name=None):
         val = self.read(4, 'I')

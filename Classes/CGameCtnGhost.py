@@ -18,10 +18,9 @@ def Chunk00A(bp):
 
 
 def Chunk00B(bp):
-    numCheckpoints = bp.uint32('numCheckpoints')
-    for i in range(numCheckpoints):
-        bp.uint32(f'time {i}')
-        bp.uint32(f'stuntsScore {i}')
+    bp.customList([(lambda x: x.uint32, 'time'),
+                   (lambda x: x.uint32, 'stuntScore')],
+                  'checkpoints')
 
 
 def Chunk00C(bp):
@@ -77,21 +76,18 @@ def Chunk019(bp):
     if eventsDuration == 0:
         return
     bp.uint32('u1')
-    numControl = bp.uint32('numControl')
-    for i in range(numControl):
-        bp.lookbackString(f'controlNames {i}')
-
+    bp.customList([(lambda x: x.lookbackString, 'controlNames')],
+                  'controlNameList')
     numControlEntries = bp.uint32('numControlEntries')
     bp.uint32('u2')
-    for i in range(numControlEntries):
-        bp.uint32(f'time {i}')
-        bp.byte(f'controlNameIndex {i}')
-        bp.uint32(f'onOff {i}')
-
+    bp.customArray(numControlEntries,
+                   [(lambda x: x.uint32, 'time'),
+                    (lambda x: x.byte, 'controlNameIndex'),
+                    (lambda x: x.uint32, 'onOff')],
+                   'controlEntries')
     bp.string('gameVersion')
     bp.uint32('exeChecksum')
     bp.uint32('osKind')
     bp.uint32('cpuKind')
     bp.string('raceSettingsXML')
     bp.uint32('u3')
-

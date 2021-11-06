@@ -35,6 +35,27 @@ class GbxWriter:
         self.data.extend(bytes([val]))
         return val
 
+    def customArray(self, size, arg_list, name, isRef=True):
+        if isRef:
+            l = self.value_handler[self.current_chunk][name]
+        else:
+            l = name
+        for i in range(size):
+            d = l.data[i]
+            for (f, el_name) in arg_list:
+                f(self)(d[el_name], isRef=False)
+
+    def customList(self, arg_list, name, isRef=True):
+        if isRef:
+            l = self.value_handler[self.current_chunk][name]
+        else:
+            l = name
+        self.uint32(l.size, isRef=False)
+        for i in range(l.size):
+            d = l.data[i]
+            for (f, el_name) in arg_list:
+                f(self)(d[el_name], isRef=False)
+
     def chunkId(self, name, isRef=True):
         if isRef:
             val = self.value_handler[self.current_chunk][name]

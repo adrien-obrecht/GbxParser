@@ -103,15 +103,10 @@ def Chunk011(bp):
 
 
 def Chunk017(bp):
-    #bp.array('checkPoints',
-    #         [(lambda x: x.uint32(), 'cp1'),
-    #          (lambda x: x.uint32(), 'cp2'),
-    #          (lambda x: x.uint32(), 'cp3')])
-    numCheckpoints = bp.uint32('numCheckpoints')
-    for i in range(numCheckpoints):
-        bp.uint32(f'Cp {i} 1')
-        bp.uint32(f'Cp {i} 2')
-        bp.uint32(f'Cp {i} 3')
+    bp.customList([(lambda x: x.uint32(), 'cp1'),
+                   (lambda x: x.uint32(), 'cp2'),
+                   (lambda x: x.uint32(), 'cp3')],
+                  'cehckpoints')
 
 
 def Chunk018(bp):

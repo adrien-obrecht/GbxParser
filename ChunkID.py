@@ -6,6 +6,7 @@ class Id(Enum):
     CControlEffectSimi005 = 117506053
     CGameCtnBlockSkin000 = 50696192
     CGameCtnBlockSkin002 = 50696194
+    CGameCtnChallenge000 = 50606080
     CGameCtnChallenge002 = 50606082
     CGameCtnChallenge003 = 50606083
     CGameCtnChallenge004 = 50606084
@@ -73,6 +74,7 @@ class Id(Enum):
     CGameCtnReplayRecord007 = 50933767
     CGameCtnReplayRecord014 = 50933780
     CGameGhost005 = 50589701
+    CTrackManiaReplayRecord000 = 604495872
     Facade = 4207599105
     Unknown = 1056968704
 
