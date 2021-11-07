@@ -2,6 +2,7 @@ import lzo
 import logging
 from GbxReader import GbxReader
 from GbxWriter import GbxWriter
+from Containers import Node
 
 
 def readHead(bp: GbxReader):
@@ -16,7 +17,8 @@ def readHead(bp: GbxReader):
         bp.byte('u2')
 
     if version >= 3:
-        bp.chunkId('chunkId')
+        chunkId = bp.chunkId('chunkId')
+        bp.chunk_value.id = chunkId
 
     if version >= 6:
         readUserData(bp)
@@ -61,7 +63,7 @@ def readUserData(bp):
         cV = bp.chunk_value
         import BlockImporter as bi
         for cid, size in entries.items():
-            bp.chunk_value = {}
+            bp.chunk_value = Node()
             bp.resetLookbackState()
             if cid.value in bi.chunkLink:
                 logging.info(f"Reading chunk {cid}")

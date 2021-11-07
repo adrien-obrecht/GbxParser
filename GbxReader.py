@@ -1,5 +1,5 @@
 from ChunkID import Id
-from Containers import Array, Vector2, Vector3, List
+from Containers import Array, Vector2, Vector3, List, Node
 from collections import OrderedDict
 import logging
 import os
@@ -20,8 +20,8 @@ class GbxReader:
         self.lookback_history = []
         self.node_index = set()
         self.stored_strings = []
-        self.value_handler = OrderedDict()
-        self.chunk_value = {}
+        self.value_handler = Node()
+        self.chunk_value = Node()
         self.chunk_order = []
 
     def bool(self, name=None):
@@ -113,7 +113,8 @@ class GbxReader:
 
     def freezeCurrentChunk(self):
         d = {'data': self.data, 'pos': self.pos, 'chunk_value': self.chunk_value}
-        self.chunk_value = {}
+        self.chunk_value = Node()
+        self.chunk_value.depth = d['chunk_value'].depth + 1
         self.frozen_chunks.append(d)
 
     def int16(self, name=None):
@@ -180,10 +181,12 @@ class GbxReader:
         if idx >= 0 and idx not in self.node_index:
             id = self.chunkId()
             self.chunk_value[name + "Id"] = id
+            self.chunk_value.id = id
             self.node_index.add(idx)
             cV = self.chunk_value
             vH = self.value_handler
-            self.value_handler = {}
+            self.value_handler = Node()
+            self.value_handler.depth = vH.depth + 1
             self.readNode()
             vH, self.value_handler = self.value_handler, vH
             self.chunk_value = cV
@@ -216,9 +219,12 @@ class GbxReader:
 
     def readNode(self):
         import BlockImporter
+        depth = self.chunk_value.depth
         while True:
-            self.chunk_value = {}
+            self.chunk_value = Node()
+            self.chunk_value.depth = depth
             chunkId = self.chunkId()
+            self.chunk_value.id = chunkId
             self.chunk_order.append(chunkId)
             if chunkId == Id['Facade']:
                 return

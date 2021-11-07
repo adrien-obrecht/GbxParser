@@ -103,10 +103,10 @@ def Chunk011(bp):
 
 
 def Chunk017(bp):
-    bp.customList([(lambda x: x.uint32(), 'cp1'),
-                   (lambda x: x.uint32(), 'cp2'),
-                   (lambda x: x.uint32(), 'cp3')],
-                  'cehckpoints')
+    bp.customList([(lambda x: x.uint32, 'cp1'),
+                   (lambda x: x.uint32, 'cp2'),
+                   (lambda x: x.uint32, 'cp3')],
+                  'checkpointsPositions')
 
 
 def Chunk018(bp):
