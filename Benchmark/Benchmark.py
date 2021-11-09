@@ -11,16 +11,18 @@ logging.basicConfig(format='%(asctime)s %(levelname)s : %(message)s', datefmt='%
 
 def test_parse(directory, result):
     for f in os.listdir(directory):
+        path = os.path.join(os.getcwd(), directory, f)
+
         result["nb"] += 1
 
         try:
-            t = timeit.timeit(lambda: GbxReader(f"{os.getcwd()}\\{directory}\\{f}"), number=NUMBER_OF_TESTS) * 1000
+            t = timeit.timeit(lambda: GbxReader(path), number=NUMBER_OF_TESTS) * 1000
         except BaseException as e:
             logging.error(e)
             continue
         result["parsed"] += 1
         result["time_parse"] = t
-        g = GbxReader(f"{os.getcwd()}\\{directory}\\{f}")
+        g = GbxReader(path)
         g.parseAll()
         try:
             def f(g):

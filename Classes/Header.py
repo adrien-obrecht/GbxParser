@@ -1,4 +1,4 @@
-import lzo
+from Lzo.Lzo import LZO
 import logging
 from GbxReader import GbxReader
 from GbxWriter import GbxWriter
@@ -40,7 +40,7 @@ def readHead(bp: GbxReader):
     bp.freezeCurrentChunk()
     bp.resetLookbackState()
 
-    bp.data = bytearray(lzo.decompress(compData, False, dataSize))
+    bp.data = LZO().decompress(compData, dataSize)
     bp.pos = 0
     bp.readNode()
 
@@ -107,7 +107,7 @@ def writeHead(bp):
     bp_.readNode()
 
     data = bytes(bp_.data)
-    compData = lzo.compress(bytes(data), 0, False)
+    compData = LZO().compress(bytes(data))
     bp.uint32(len(data), isRef=False)
     bp.uint32(len(compData), isRef=False)
     bp.read(0, compData, isRef=False)
