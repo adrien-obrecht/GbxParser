@@ -2,7 +2,8 @@ from Lzo.Lzo import LZO
 import logging
 from GbxReader import GbxReader
 from GbxWriter import GbxWriter
-from Containers import Node
+from GameIDs import ChunkId, NodeId
+from Containers import Node, Chunk
 
 
 def readHead(bp: GbxReader):
@@ -17,32 +18,38 @@ def readHead(bp: GbxReader):
         bp.byte('u2')
 
     if version >= 3:
-        chunkId = bp.chunkId('chunkId')
-        bp.chunk_value.id = chunkId
+        node_id = bp.nodeId('nodeId')
+        bp.chunk_value.id = node_id
 
     if version >= 6:
         readUserData(bp)
 
     bp.uint32('numNodes')
 
-    numExternalNodes = bp.uint32('numExternalNodes')
-    if numExternalNodes > 0:
-        logging.info(f"Num external node is {numExternalNodes}! ")
+    num_external_nodes = bp.uint32('numExternalNodes')
+    if num_external_nodes > 0:
+        logging.info(f"Num external node is {num_external_nodes}! ")
 
-    dataSize = bp.uint32('dataSize')
-    compDataSize = bp.uint32('compDataSize')
-    compData = bp.read(compDataSize, name='compData')
+    data_size = bp.uint32('dataSize')
+    comp_data_size = bp.uint32('compDataSize')
+    comp_data = bp.read(comp_data_size, name='compData')
 
-    if compDataSize <= 0:
+    if comp_data_size <= 0:
         bp.value_handler[0] = bp.chunk_value
         return
 
     bp.freezeCurrentChunk()
     bp.resetLookbackState()
+    former_value_handler = bp.value_handler
+    bp.value_handler = Node()
+    bp.value_handler.id = NodeId.Body
 
-    bp.data = LZO().decompress(compData, dataSize)
+    bp.data = LZO().decompress(comp_data, data_size)
     bp.pos = 0
     bp.readNode()
+    value_handler = bp.value_handler
+    bp.value_handler = former_value_handler
+    bp.value_handler['Body'] = value_handler
 
     bp.unfreezeCurrentChunk()
     bp.storeCurrentChunk(0)
@@ -63,7 +70,8 @@ def readUserData(bp):
         cV = bp.chunk_value
         import BlockImporter as bi
         for cid, size in entries.items():
-            bp.chunk_value = Node()
+            bp.chunk_value = Chunk()
+            bp.chunk_value.id = cid
             bp.resetLookbackState()
             if cid.value in bi.chunkLink:
                 logging.info(f"Reading chunk {cid}")
@@ -93,9 +101,9 @@ def writeHead(bp):
 
     bp.uint32('numNodes')
 
-    numExternalNodes = bp.uint32('numExternalNodes')
-    if numExternalNodes > 0:
-        logging.info(f"Num external node is {numExternalNodes}0! ")
+    num_external_nodes = bp.uint32('numExternalNodes')
+    if num_external_nodes > 0:
+        logging.info(f"Num external node is {num_external_nodes}0! ")
 
     if not bp.chunk_order:
         return
@@ -130,27 +138,27 @@ def writeUserData(bp):
     bp_.stored_strings = bp.stored_strings
     bp_.current_chunk = 0
     bp_.data = bytearray()
-    chunkDatas = []
+    chunk_datas = []
     import BlockImporter as bi
     for _ in range(num_chunks):
         bp_.current_chunk = bp_.chunk_order[0]
         bp_.chunk_order = bp_.chunk_order[1:]
         logging.info(f"Writing chunk {bp_.current_chunk}")
         bi.chunkLink[bp_.current_chunk.value](bp_)
-        chunkDatas += [bp_.data]
+        chunk_datas += [bp_.data]
         bp_.data = bytearray()
 
     bp_.current_chunk = 0
 
     for i in range(num_chunks):
         bp_.chunkId(f'{i} chunkId')
-        if len(bytes(chunkDatas[i])) < 17000:
-            bp_.uint32(len(bytes(chunkDatas[i])), isRef=False)
+        if len(bytes(chunk_datas[i])) < 17000:
+            bp_.uint32(len(bytes(chunk_datas[i])), isRef=False)
         else:
-            bp_.uint32(len(bytes(chunkDatas[i]))+2**31, isRef=False)
+            bp_.uint32(len(bytes(chunk_datas[i]))+2**31, isRef=False)
 
     for i in range(num_chunks):
-        bp_.read(0, chunkDatas[i], isRef=False)
+        bp_.read(0, chunk_datas[i], isRef=False)
 
     data = bytes(bp_.data)
     bp.uint32(len(data) + 4, isRef=False)

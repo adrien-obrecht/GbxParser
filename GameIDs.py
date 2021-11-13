@@ -1,7 +1,10 @@
 from enum import Enum
 
 
-class Id(Enum):
+class ChunkId(Enum):
+    Header = 0
+    Body = 1
+    Main = 2
     CControlEffectSimi000 = 117506048
     CControlEffectSimi005 = 117506053
     CGameCtnBlockSkin000 = 50696192
@@ -80,8 +83,41 @@ class Id(Enum):
 
     @classmethod
     def intIsId(cls, i):
-        return i in set(item.value for item in Id)
+        return i in set(item.value for item in ChunkId)
 
     @classmethod
     def strIsId(cls, s):
-        return s in set(item.name for item in Id)
+        return s in set(item.name for item in ChunkId)
+
+
+class NodeId(Enum):
+    Header = 0
+    Body = 1
+    Main = 2
+    CControlEffectSimi = 117506048
+    CGameCtnBlockSkin = 50696192
+    CGameCtnChallenge = 50606080
+    CGameCtnChallengeParameters = 50704384
+    CGameCtnCollectorList = 50442240
+    CGameCtnGhost = 50929664
+    CGameCtnMediaBlockCameraCustom = 50995200
+    CGameCtnMediaBlockCameraGame = 50872320
+    CGameCtnMediaBlockFxBlurMotion = 50864128
+    CGameCtnMediaBlockText = 51019776
+    CGameCtnMediaBlockTrails = 51023872
+    CGameCtnMediaBlockTransitionFade = 51032064
+    CGameCtnMediaClip = 50827264
+    CGameCtnMediaClipGroup = 50831360
+    CGameCtnMediaTrack = 50823168
+    CGameCtnReplayRecord = 50933760
+    CTrackManiaReplayRecord = 604495872
+    Facade = 4207599105
+    Unknown = 1056968704
+
+    @classmethod
+    def intIsId(cls, i):
+        return i in set(item.value for item in ChunkId)
+
+    @classmethod
+    def strIsId(cls, s):
+        return s in set(item.name for item in ChunkId)

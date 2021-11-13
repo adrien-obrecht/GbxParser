@@ -1,6 +1,6 @@
 import struct
 import logging
-from ChunkID import Id
+from GameIDs import ChunkId
 
 
 class GbxWriter:
@@ -62,7 +62,7 @@ class GbxWriter:
         else:
             val = name
 
-        if not isinstance(val, Id):
+        if not isinstance(val, ChunkId):
             logging.error(f"Provided val {val} is not a correct chunkId")
             return
         val = val.value

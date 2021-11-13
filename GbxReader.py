@@ -1,5 +1,5 @@
-from ChunkID import Id
-from Containers import Array, Vector2, Vector3, List, Node
+from GameIDs import ChunkId, NodeId
+from Containers import Array, Vector2, Vector3, List, Node, Chunk
 from collections import OrderedDict
 import logging
 import os
@@ -21,6 +21,7 @@ class GbxReader:
         self.node_index = set()
         self.stored_strings = []
         self.value_handler = Node()
+        self.value_handler.id = NodeId.Main
         self.chunk_value = Node()
         self.chunk_order = []
 
@@ -67,13 +68,13 @@ class GbxReader:
 
     def chunkId(self, name=None):
         val = self.read(4, 'I')
-        if not Id.intIsId(val):
-            logging.error(f"Unknown chunkId {val}")
+        if not ChunkId.intIsId(val):
+            logging.error(f"Unknown chunk Id {val}")
             return
-        chunkId = Id(val)
+        chunk_id = ChunkId(val)
         if name is not None:
-            self.chunk_value[name] = chunkId
-        return chunkId
+            self.chunk_value[name] = chunk_id
+        return chunk_id
 
     def color(self, name=None):
         val = self.float(), self.float(), self.float()
@@ -85,20 +86,22 @@ class GbxReader:
     def fileRef(self, name=None):
         version = self.byte()
         if version >= 3:
-            checkSum = self.read(32)
+            check_sum = self.read(32)
         else:
-            checkSum = None
+            check_sum = None
 
-        filePath = self.string()
-        if len(filePath) > 0 and version >= 1:
-            locatorUrl = self.string()
+        file_path = self.string()
+        if len(file_path) > 0 and version >= 1:
+            locator_url = self.string()
         else:
-            locatorUrl = None
+            locator_url = None
 
         if name is not None:
-            self.chunk_value[name] = {'version': version, 'checksum': checkSum, 'filePath': filePath,
-                                      'locatorUrl': locatorUrl}
-        return checkSum, filePath, locatorUrl
+            self.chunk_value[name] = {'version': version,
+                                      'checksum': check_sum,
+                                      'filePath': file_path,
+                                      'locatorUrl': locator_url}
+        return check_sum, file_path, locator_url
 
     def float(self, name=None):
         """Reads a 32 bit float.
@@ -176,27 +179,36 @@ class GbxReader:
             self.chunk_value[name] = s
         return s
 
+    def nodeId(self, name=None):
+        val = self.read(4, 'I')
+        if not NodeId.intIsId(val):
+            logging.error(f"Unknown node Id {val}")
+            return
+        node_id = NodeId(val)
+        if name is not None:
+            self.chunk_value[name] = node_id
+        return node_id
+
     def nodeRef(self, name=None):
-        idx = self.int32()
-        if idx >= 0 and idx not in self.node_index:
-            id = self.chunkId()
-            self.chunk_value[name + "Id"] = id
-            self.chunk_value.id = id
-            self.node_index.add(idx)
-            cV = self.chunk_value
-            vH = self.value_handler
+        index = self.int32()
+        if index >= 0 and index not in self.node_index:
+            id = self.nodeId()
+            self.node_index.add(index)
+            former_chunk_value = self.chunk_value
+            former_value_handler = self.value_handler
             self.value_handler = Node()
-            self.value_handler.depth = vH.depth + 1
+            self.value_handler.id = id
+            self.value_handler.depth = former_value_handler.depth + 1
             self.readNode()
-            vH, self.value_handler = self.value_handler, vH
-            self.chunk_value = cV
-            val = vH
+            node = self.value_handler
+            self.value_handler = former_value_handler
+            self.chunk_value = former_chunk_value
         else:
-            val = None
+            node = None
 
         if name is not None:
-            self.chunk_value[name] = val
-        return val
+            self.chunk_value[name] = node
+        return node
 
     def parseAll(self):
         import Classes.Header
@@ -221,30 +233,30 @@ class GbxReader:
         import BlockImporter
         depth = self.chunk_value.depth
         while True:
-            self.chunk_value = Node()
+            self.chunk_value = Chunk()
             self.chunk_value.depth = depth
-            chunkId = self.chunkId()
-            self.chunk_value.id = chunkId
-            self.chunk_order.append(chunkId)
-            if chunkId == Id['Facade']:
+            chunk_id = self.chunkId()
+            self.chunk_value.id = chunk_id
+            self.chunk_order.append(chunk_id)
+            if chunk_id == ChunkId['Facade']:
                 return
-            skipsize = -1
+            skip_size = -1
             skip = self.int32()
             if skip == 0x534B4950:
-                if chunkId.value not in BlockImporter.skipableChunkList:
-                    logging.error(f"Chunk {chunkId} should be in skipableChunkList!")
-                skipsize = self.uint32()
+                if chunk_id.value not in BlockImporter.skipableChunkList:
+                    logging.error(f"Chunk {chunk_id} should be in skipableChunkList!")
+                skip_size = self.uint32()
             else:
                 self.pos -= 4
-            if chunkId.value in BlockImporter.chunkLink:
-                logging.info(f"Reading chunk {chunkId}")
-                BlockImporter.chunkLink[chunkId.value](self)
-                self.value_handler[chunkId] = self.chunk_value
-            elif skipsize != -1:
-                logging.info(f"Skiping chunk {chunkId}")
-                self.skip(skipsize)
+            if chunk_id.value in BlockImporter.chunkLink:
+                logging.info(f"Reading chunk {chunk_id}")
+                BlockImporter.chunkLink[chunk_id.value](self)
+                self.value_handler[chunk_id] = self.chunk_value
+            elif skip_size != -1:
+                logging.info(f"Skipping chunk {chunk_id}")
+                self.skip(skip_size)
             else:
-                logging.info(f"Unknown chunk {chunkId}")
+                logging.info(f"Unknown chunk {chunk_id}")
                 return
 
     def resetLookbackState(self):
@@ -266,12 +278,12 @@ class GbxReader:
         Returns:
             the string read from the buffer, None if there was an error
         """
-        strlen = self.uint32()
+        str_len = self.uint32()
         try:
             if not decode:
-                val = self.read(strlen)
+                val = self.read(str_len)
             else:
-                val = self.read(strlen, str(strlen) + 's').decode('utf-8')
+                val = self.read(str_len, str(str_len) + 's').decode('utf-8')
 
         except UnicodeDecodeError as e:
             logging.warning(f'Failed to read string: {e}')
