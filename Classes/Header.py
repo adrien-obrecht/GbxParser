@@ -117,20 +117,20 @@ def writeHead(bp):
     bp_.chunk_order = bp.chunk_order
     bp_.value_handler = bp.value_handler
     bp_.node_index = bp.node_index
-    bp_.readNode()
+    bp_.node()
 
     data = bytes(bp_.data)
     compData = LZO().compress(bytes(data))
-    bp.uint32(len(data), isRef=False)
-    bp.uint32(len(compData), isRef=False)
-    bp.bytes(0, compData, isRef=False)
+    bp.uint32(len(data), is_ref=False)
+    bp.uint32(len(compData), is_ref=False)
+    bp.bytes(0, compData, is_ref=False)
 
 
 def writeUserData(bp):
     try:
         num_chunks = bp.uint32('numChunks')
     except KeyError:
-        bp.uint32(0, isRef=False)
+        bp.uint32(0, is_ref=False)
         bp.chunk_order = bp.chunk_order[1:]
         return
 
@@ -158,15 +158,15 @@ def writeUserData(bp):
     for i in range(num_chunks):
         bp_.chunkId(f'{i} chunkId')
         if len(bytes(chunk_datas[i])) < 17000:
-            bp_.uint32(len(bytes(chunk_datas[i])), isRef=False)
+            bp_.uint32(len(bytes(chunk_datas[i])), is_ref=False)
         else:
-            bp_.uint32(len(bytes(chunk_datas[i]))+2**31, isRef=False)
+            bp_.uint32(len(bytes(chunk_datas[i])) + 2 ** 31, is_ref=False)
 
     for i in range(num_chunks):
-        bp_.read(0, chunk_datas[i], isRef=False)
+        bp_.bytes(0, chunk_datas[i], is_ref=False)
 
     data = bytes(bp_.data)
-    bp.uint32(len(data) + 4, isRef=False)
+    bp.uint32(len(data) + 4, is_ref=False)
     bp.uint32('numChunks')
-    bp.bytes(0, data, isRef=False)
+    bp.bytes(0, data, is_ref=False)
     bp.chunk_order = bp_.chunk_order

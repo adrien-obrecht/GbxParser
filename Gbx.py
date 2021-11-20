@@ -18,3 +18,11 @@ class Gbx:
                 f += str(node) + "\n"
 
         return f
+
+    def __sub__(self, other):
+        g = Gbx()
+        g.id = self.id if (self.id == other.id) else (self.id, other.id)
+        for i in range(len(self.header_chunk_list)):
+            g.header_chunk_list.append(self.header_chunk_list[i] - other.header_chunk_list[i])
+        g.node_list = [self.node_list[0] - other.node_list[0]]
+        return g

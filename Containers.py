@@ -48,6 +48,22 @@ class Chunk:
             return s
         return "| " * self.depth + f"Chunk {self.id}: \n" + rprint(self.data, self.depth + 1)
 
+    def __sub__(self, other):
+        c = Chunk()
+
+        c.id = self.id if (self.id == other.id) else (self.id, other.id)
+        for el in self.data:
+            if el not in other.data or self.data[el] != other.data[el]:
+                c.data[el] = self.data[el]
+        return c
+
+    def count_node(self):
+        r = 0
+        for el in self.data.values():
+            if isinstance(el, Node) and el.id is not None:
+                r += el.count_node()
+        return r
+
 
 class List:
     def __init__(self):
@@ -133,4 +149,14 @@ class Node:
     def keys(self):
         return self.data.keys()
 
+    def __sub__(self, other):
+        n = Node()
+
+        n.id = self.id if (self.id == other.id) else (self.id, other.id)
+        for i in range(len(self.chunk_list)):
+            n.chunk_list.append(self.chunk_list[i] - other.chunk_list[i])
+        return n
+
+    def count_node(self):
+        return 1 + sum(c.count_node() for c in self.chunk_list)
 

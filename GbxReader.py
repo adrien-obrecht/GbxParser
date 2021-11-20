@@ -24,10 +24,8 @@ class GbxReader:
         else:
             self.data = data
         self.pos = 0
-        self.chunk_hierarchy = []
         self.frozen_chunks = []
         self.seen_lookback = False
-        self.lookback_history = []
         self.node_index = set()
         self.stored_strings = []
         self.current_chunk = Chunk()
@@ -100,7 +98,7 @@ class GbxReader:
         """
         val = self.bytes(4, 'I')
         if not ChunkId.intIsId(val):
-            logging.error(f"Unknown chunk Id {val}")
+            logging.info(f"Unknown chunk Id {val}")
             return ChunkId.Unknown
         chunk_id = ChunkId(val)
         if name is not None:
@@ -137,7 +135,7 @@ class GbxReader:
         if len(file_path) > 0 and version >= 1:
             locator_url = self.string()
         else:
-            locator_url = None
+            locator_url = ''
 
         if name is not None:
             self.current_chunk[name] = {'version': version,
@@ -214,7 +212,6 @@ class GbxReader:
                 s = self.stored_strings[index - 1]
         else:
             s = ''
-        self.lookback_history.append([bin(inp), s])
         if name is not None:
             self.current_chunk[name] = s
         return s
@@ -302,9 +299,9 @@ class GbxReader:
             if id == ChunkId.Facade:
                 return node
             skip_size = -1
-            skip = self.int32()
+            skip = self.chunkId()
             # TODO use ChunkId.Skip
-            if skip == 0x534B4950:
+            if skip == ChunkId.Skip:
                 if not BlockImporter.is_skipable(id):
                     logging.error(f"Chunk {id} should be in skipableChunkList!")
                 skip_size = self.uint32()
@@ -318,7 +315,7 @@ class GbxReader:
                 logging.info(f"Skipping chunk {id}")
                 self.skip(skip_size)
             else:
-                logging.info(f"Unknown chunk {id}")
+                logging.error(f"Unknown chunk {id}")
                 return node
 
     def resetLookbackState(self):
@@ -471,4 +468,5 @@ class GbxReader:
         node = self.node()
         node.id = NodeId.Body
         gbx.node_list = [node]
+
         return gbx

@@ -4,7 +4,7 @@ import logging
 import timeit
 import os
 
-NUMBER_OF_TESTS = 10
+NUMBER_OF_TESTS = 1
 
 logging.basicConfig(format='%(asctime)s %(levelname)s : %(message)s', datefmt='%H:%M:%S')
 
@@ -22,15 +22,13 @@ def test_parse(directory, result):
             continue
         result["parsed"] += 1
         result["time_parse"] = t
-        g = GbxReader(path)
-        g.parseAll()
+        reader = GbxReader(path)
+        gbx = reader.file()
         try:
-            def f(g):
-                bw = GbxWriter()
-                bw.value_handler = g.value_handler
-                bw.chunk_order = g.chunk_order
-                bw.writeAll()
-            t = timeit.timeit(lambda: f(g), number=NUMBER_OF_TESTS) * 1000
+            def f(gbx):
+                writer = GbxWriter()
+                writer.writeHead(gbx)
+            t = timeit.timeit(lambda: f(gbx), number=NUMBER_OF_TESTS) * 1000
         except BaseException as e:
             logging.error(e)
             continue

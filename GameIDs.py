@@ -15,7 +15,7 @@ class ChunkId(Enum):
     CGameCtnChallenge004 = 50606084
     CGameCtnChallenge005 = 50606085
     CGameCtnChallenge007 = 50606087
-    CGameCtnChallenge00C = 50606093
+    CGameCtnChallenge00D = 50606093
     CGameCtnChallenge011 = 50606097
     CGameCtnChallenge017 = 50606103
     CGameCtnChallenge018 = 50606104
@@ -78,7 +78,8 @@ class ChunkId(Enum):
     CGameCtnReplayRecord014 = 50933780
     CGameGhost005 = 50589701
     CTrackManiaReplayRecord000 = 604495872
-    Facade = 4207599105
+    Facade = 0xFACADE01
+    Skip = 0x534B4950
     Unknown = 1056968704
 
     @classmethod
