@@ -36,14 +36,17 @@ class Chunk:
         def rprint(dico, depth):
             s = ""
             for v in dico.keys():
-                if isinstance(dico[v], (Chunk, Node)) and len(str(dico[v])) < 200000:
+                if isinstance(dico[v], Chunk):
                     s += "| " * depth + "\n"
                     s += "| " * depth + f"{dico[v].id}: \n"
                     s += rprint(dico[v], depth + 1)
+                elif isinstance(dico[v], Node):
+                    dico[v].depth = self.depth + 1
+                    s += str(dico[v])
                 else:
                     s += "| " * depth + f"{v} : {dico[v]} \n"
             return s
-        return f"Node {self.id}: \n" + rprint(self.data, self.depth + 1)
+        return "| " * self.depth + f"Chunk {self.id}: \n" + rprint(self.data, self.depth + 1)
 
 
 class List:
@@ -104,6 +107,7 @@ class Node:
     def __init__(self):
         self.id = None
         self.data = {}
+        self.chunk_list = []
         self.depth = 0
 
     def __getitem__(self, key):
@@ -116,34 +120,11 @@ class Node:
         return self.data == other.data and self.id == other.id
 
     def __repr__(self):
-        def rprint(dico, depth):
-            s = ""
-            for v in dico.keys():
-                if isinstance(dico[v], (Chunk, Node)) and len(str(dico[v])) < 200000:
-                    s += "| " * depth + "\n"
-                    s += "| " * depth + f"{dico[v].id}: \n"
-                    s += rprint(dico[v], depth + 1)
-                else:
-                    s += "| " * depth + f"{v} : {dico[v]} \n"
-            return s
-        return f"Node {self.id}: \n" + rprint(self.data, self.depth + 1)
-
-    def print_diff(self, other, path=""):
-        if self.id != other.id:
-            print("This nodes aren't the same!")
-        else:
-            for e in self.keys():
-                if e not in other.keys():
-                    print(f"{e} in {path}")
-                    print(f"This value is not in copy : {e}")
-                    print()
-                elif isinstance(self[e], Node):
-                    self[e].print_diff(other[e], path+str(e))
-                elif self[e] != other[e]:
-                    print(f"{e} in {path}")
-                    print(self[e])
-                    print(other[e])
-                    print()
+        f = ""
+        for chunk in self.chunk_list:
+            chunk.depth = self.depth + 1
+            f += f"{chunk}"
+        return "| " * self.depth + f"Node {self.id}: \n" + f
 
     def keys(self):
         return self.data.keys()

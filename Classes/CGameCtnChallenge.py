@@ -194,7 +194,6 @@ def Chunk028(bp):
 
 def Chunk029(bp):
     bp.read(16, name='passwordHash')
-
     bp.uint32('CRC32')
 
 

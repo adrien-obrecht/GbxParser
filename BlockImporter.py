@@ -1,4 +1,5 @@
 from Classes import *
+from GameIDs import ChunkId
 
 chunkLink = {0x00000000: Header.writeHead,
 
@@ -124,3 +125,11 @@ skipableChunkList = {0x03043017,
                      0x03092017,
                      0x03093007
                      }
+
+
+def is_known(id: ChunkId) -> bool:
+    return id.value in chunkLink
+
+
+def is_skipable(id: ChunkId) -> bool:
+    return id.value in skipableChunkList
