@@ -6,7 +6,7 @@ def Chunk005(bp):
     for i in range(numKeys):
         bp.float(f'timStamp {i}')
         bp.uint32(f'interpolation {i}')
-        bp.read(8, name=f'u1 {i}')
+        bp.bytes(8, name=f'u1 {i}')
         bp.vec3(f'cameraPosition {i}')
         bp.float(f'pitch {i}')
         bp.float(f'yaw {i}')

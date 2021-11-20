@@ -16,4 +16,4 @@ def Chunk003(bp):
             bp.float(f'brightness {i} {j}')
             bp.float(f'contrast {i} {j}')
             bp.vec3(f'color {i} {j}')
-            bp.read(4*4, name=f'u1 {i} {j}')
+            bp.bytes(4 * 4, name=f'u1 {i} {j}')

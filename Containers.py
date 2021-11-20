@@ -61,6 +61,10 @@ class List:
     def __eq__(self, other):
         return self.data == other.data
 
+    def __iter__(self):
+        for v in self.data:
+            yield v
+
 
 class Vector3:
     def __init__(self, x=0, y=0, z=0):

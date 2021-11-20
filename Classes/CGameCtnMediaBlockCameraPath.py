@@ -16,4 +16,4 @@ def Chunk002(bp):
         bp.uint32(f'idxAnchorPlayer {i}')
         bp.vec3(f'targetPosition {i}')
         bp.float(f'weight {i}')
-        bp.read(4*4, name=f'u1 {i}')
+        bp.bytes(4 * 4, name=f'u1 {i}')

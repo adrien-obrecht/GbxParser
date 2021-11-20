@@ -41,7 +41,7 @@ def Chunk010(bp):
 
 def Chunk012(bp):
     bp.uint32('u1')
-    bp.read(16, name='u2')
+    bp.bytes(16, name='u2')
 
 
 def Chunk013(bp):

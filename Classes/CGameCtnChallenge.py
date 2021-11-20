@@ -56,14 +56,14 @@ def Chunk003(bp):
                 if version >= 4:
                     bp.vec2('mapTarget')
                     if version >= 5:
-                        bp.read(16, name='u1')
+                        bp.bytes(16, name='u1')
                         if version >= 6:
                             bp.string('mapType')
                             bp.string('mapStyle')
                             if version <= 8:
                                 bp.bool('u2')
                             if version >= 8:
-                                bp.read(8, name='lightmapCacheUID')
+                                bp.bytes(8, name='lightmapCacheUID')
                                 if version >= 9:
                                     bp.byte('lightmapVersion')
                                     if version >= 11:
@@ -82,12 +82,12 @@ def Chunk007(bp):
     version = bp.uint32('version')
     if version != 0:
         size = bp.uint32('size')
-        bp.read(len("<Thumbnail.jpg>"), name="<Thumbnail.jpg>")
-        bp.read(size, name='Thumbnail')
-        bp.read(len("</Thumbnail.jpg>"), name="</Thumbnail.jpg>")
-        bp.read(len("<Comments>"), name="<Comments>")
+        bp.bytes(len("<Thumbnail.jpg>"), name="<Thumbnail.jpg>")
+        bp.bytes(size, name='Thumbnail')
+        bp.bytes(len("</Thumbnail.jpg>"), name="</Thumbnail.jpg>")
+        bp.bytes(len("<Comments>"), name="<Comments>")
         bp.string('commments')
-        bp.read(len("</Comments>"), name="</Comments>")
+        bp.bytes(len("</Comments>"), name="</Comments>")
 
 
 def Chunk00D(bp):
@@ -193,7 +193,7 @@ def Chunk028(bp):
 
 
 def Chunk029(bp):
-    bp.read(16, name='passwordHash')
+    bp.bytes(16, name='passwordHash')
     bp.uint32('CRC32')
 
 

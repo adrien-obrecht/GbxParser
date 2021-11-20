@@ -22,7 +22,7 @@ def Chunk001(bp):
 
 def Chunk002(bp):
     GBXSize = bp.uint32('GBXSize')
-    bp.read(GBXSize, name='data')
+    bp.bytes(GBXSize, name='data')
     """data = bytes(bp.read(GBXSize, 'data'))
     try:
         track = GbxReader(data)
@@ -35,8 +35,8 @@ def Chunk007(bp):
 
 
 def Chunk014(bp):
-    bp.read(4, name='u1')
+    bp.bytes(4, name='u1')
     numGhosts = bp.uint32('numGhosts')
     for i in range(numGhosts):
         bp.nodeRef(f'ghost {i}')
-    bp.read(16, name='u2')
+    bp.bytes(16, name='u2')

@@ -19,4 +19,4 @@ def Chunk001(bp):
         bp.uint32(f'vertex1 {i}')
         bp.uint32(f'vertex2 {i}')
         bp.uint32(f'vertex3 {i}')
-    bp.read(7*4, name='u1')
+    bp.bytes(7 * 4, name='u1')

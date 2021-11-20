@@ -14,7 +14,7 @@ def Chunk005(bp):
 def readChunk005(bp):
     uncompSize = bp.uint32('uncompSize')
     compSize = bp.uint32('compSize')
-    compData = bp.read(compSize, name='compData')
+    compData = bp.bytes(compSize, name='compData')
     """
     data = zlib.decompress(compData, 0, uncompSize)
     gr = ByteReader(data)
@@ -45,4 +45,4 @@ def readChunk005(bp):
 def writeChunk005(bw):
     uncompSize = bw.uint32('uncompSize')
     compSize = bw.uint32('compSize')
-    compData = bw.read(compSize, name='compData')
+    compData = bw.bytes(compSize, name='compData')

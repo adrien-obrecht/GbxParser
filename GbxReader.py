@@ -1,10 +1,10 @@
 from GameIDs import ChunkId, NodeId
 from Containers import Array, Vector2, Vector3, List, Node, Chunk
 from Gbx import Gbx
-from collections import OrderedDict
+from Lzo.Lzo import LZO
+
 import logging
 import os
-
 import struct
 
 
@@ -12,7 +12,7 @@ class GbxReader:
     """
     arg1 : data, can be a path to a file or a simple string of data
 
-    This object is used to read each Gbx datatypes (see https://wiki.xaseco.org/wiki/GBX#Primitives for more infos)
+    This object is used to read each Gbx datatype (see https://wiki.xaseco.org/wiki/GBX#Primitives for more info)
     It holds some local chunk values, and can therefore add each read values to it's internal memory, if a name is
     provided for it.
     """
@@ -98,7 +98,7 @@ class GbxReader:
         :param name: name of the variable if wanted to be saved in memory (default is None)
         :return: the chunkId that was read (ChunkId.Unknown if unknown, which can cause problems)
         """
-        val = self.read(4, 'I')
+        val = self.bytes(4, 'I')
         if not ChunkId.intIsId(val):
             logging.error(f"Unknown chunk Id {val}")
             return ChunkId.Unknown
@@ -129,7 +129,7 @@ class GbxReader:
         """
         version = int(self.byte())
         if version >= 3:
-            check_sum = self.read(32)
+            check_sum = self.bytes(32)
         else:
             check_sum = None
 
@@ -152,7 +152,7 @@ class GbxReader:
         :param name: name of the variable if wanted to be saved in memory (default is None)
         :return: the float that was read
         """
-        val = self.read(4, 'f')
+        val = self.bytes(4, 'f')
         if name is not None:
             self.current_chunk[name] = val
         return val
@@ -170,7 +170,7 @@ class GbxReader:
         :param name: name of the variable if wanted to be saved in memory (default is None)
         :return: The int16 that was read
         """
-        val = self.read(2, 'h')
+        val = self.bytes(2, 'h')
         if name is not None:
             self.current_chunk[name] = val
         return val
@@ -181,7 +181,7 @@ class GbxReader:
         :param name: name of the variable if wanted to be saved in memory (default is None)
         :return: The int32 that was read
         """
-        val = self.read(4, 'i')
+        val = self.bytes(4, 'i')
         if name is not None:
             self.current_chunk[name] = val
         return val
@@ -225,7 +225,7 @@ class GbxReader:
         :param name: name of the variable if wanted to be saved in memory (default is None)
         :return: the nodeId that was read (ChunkId.Unknown if unknown, which can cause problems)
         """
-        val = self.read(4, 'I')
+        val = self.bytes(4, 'I')
         if not NodeId.intIsId(val):
             logging.error(f"Unknown node Id {val}")
             return NodeId.Unknown
@@ -245,7 +245,7 @@ class GbxReader:
             self.node_index.add(index)
             id = self.nodeId()
             self.freezeCurrentChunk()
-            node = self.readNode()
+            node = self.node()
             node.id = id
             self.unfreezeCurrentChunk()
         else:
@@ -255,16 +255,7 @@ class GbxReader:
             self.current_chunk[name] = node
         return node
 
-    # TODO : make this cleaner
-    def parseAll(self) -> Gbx:
-        """
-        Parses the whole file, header to body, from the buffe
-        :return: the gbx object that got parsed, representing the whole file
-        """
-        import Classes.Header
-        return Classes.Header.readHead(self)
-
-    def read(self, num_bytes: int, format_str: str = None, name=None):
+    def bytes(self, num_bytes: int, format_str: str = None, name=None):
         """
         Reads any specified number of bytes from the buffer, with a special format if specified
         :param num_bytes: number of bytes to read
@@ -286,7 +277,7 @@ class GbxReader:
             self.current_chunk[name] = val
         return val
 
-    def readChunk(self, id: ChunkId) -> Chunk:
+    def chunk(self, id: ChunkId) -> Chunk:
         """
         Reads a chunk from the buffer (as a Gbx datatype)
         :param id: ChunkId needed to properly parse the chunk
@@ -294,11 +285,12 @@ class GbxReader:
         """
         import BlockImporter
         self.current_chunk = Chunk()
+        self.current_chunk.id = id
         if BlockImporter.is_known(id):
             BlockImporter.chunkLink[id.value](self)
         return self.current_chunk
 
-    def readNode(self) -> Node:
+    def node(self) -> Node:
         """
         Reads a node from the buffer
         :return: the node that was read
@@ -320,8 +312,7 @@ class GbxReader:
                 self.pos -= 4
             if BlockImporter.is_known(id):
                 logging.info(f"Reading chunk {id}")
-                chunk = self.readChunk(id)
-                chunk.id = id
+                chunk = self.chunk(id)
                 node.chunk_list.append(chunk)
             elif skip_size != -1:
                 logging.info(f"Skipping chunk {id}")
@@ -355,9 +346,9 @@ class GbxReader:
         str_len = self.uint32()
         try:
             if not decode:
-                val = self.read(str_len)
+                val = self.bytes(str_len)
             else:
-                val = self.read(str_len, str(str_len) + 's').decode('utf-8')
+                val = self.bytes(str_len, str(str_len) + 's').decode('utf-8')
 
         except UnicodeDecodeError as e:
             logging.warning(f'Failed to read string: {e}')
@@ -373,7 +364,7 @@ class GbxReader:
         :param name: name of the variable if wanted to be saved in memory (default is None)
         :return: The uint16 that was read
         """
-        val = self.read(2, 'H')
+        val = self.bytes(2, 'H')
         if name is not None:
             self.current_chunk[name] = val
         return val
@@ -384,7 +375,7 @@ class GbxReader:
         :param name: name of the variable if wanted to be saved in memory (default is None)
         :return: The uint32 that was read
         """
-        val = self.read(4, 'I')
+        val = self.bytes(4, 'I')
         if name is not None:
             self.current_chunk[name] = val
         return val
@@ -421,3 +412,63 @@ class GbxReader:
         if name is not None:
             self.current_chunk[name] = val
         return val
+
+    def file(self) -> Gbx:
+        """
+        Reads the entire file with which the GbxReader was initialized, from header to body
+        :return: all the data that was read
+        """
+        gbx = Gbx()
+        magic = self.bytes(3)
+
+        if magic.decode('utf-8') != 'GBX':
+            logging.warning("Not a Gbx file!")
+            return gbx
+
+        version = self.int16()
+        compression = self.bytes(3)
+        if version >= 4:
+            self.byte('u2')
+
+        if version >= 3:
+            gbx.id = self.nodeId()
+
+        if version >= 6:
+            user_data_size = self.uint32()
+            if user_data_size:
+                entries = self.customList([(lambda x: x.chunkId, 'id'),
+                                           (lambda x: x.uint32, 'size')])
+                for c in entries:
+                    size, id = c['size'], c['id']
+                    self.resetLookbackState()
+                    if id != ChunkId.Unknown:
+                        logging.info(f"Reading chunk {id}")
+                        self.chunk(id)
+                        gbx.header_chunk_list.append(self.current_chunk)
+                    else:
+                        logging.warning(f"Skipping chunk {id}")
+                        self.skip(size)
+
+        num_nodes = self.uint32()
+        num_external_nodes = self.uint32()
+
+        if num_external_nodes > 0:
+            logging.warning(f"Num external node is {num_external_nodes}! ")
+
+        # TODO : Find files with uncompressed data to properly handle them
+
+        data_size = self.uint32()
+        comp_data_size = self.uint32()
+        comp_data = self.bytes(comp_data_size)
+
+        if comp_data_size <= 0:
+            return gbx
+
+        self.resetLookbackState()
+
+        self.data = LZO().decompress(comp_data, data_size)
+        self.pos = 0
+        node = self.node()
+        node.id = NodeId.Body
+        gbx.node_list = [node]
+        return gbx

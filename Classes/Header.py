@@ -9,13 +9,13 @@ from Containers import Node, Chunk
 
 def readHead(bp: GbxReader) -> Gbx:
     g = Gbx()
-    magic = bp.read(3, name='magic')
+    magic = bp.bytes(3, name='magic')
 
     if magic.decode('utf-8') != 'GBX':
         logging.warning("Not a Gbx file!")
         return g
     version = bp.int16('version')
-    compression = bp.read(3, name='u1')
+    compression = bp.bytes(3, name='u1')
     if version >= 4:
         bp.byte('u2')
 
@@ -33,7 +33,7 @@ def readHead(bp: GbxReader) -> Gbx:
 
     data_size = bp.uint32('dataSize')
     comp_data_size = bp.uint32('compDataSize')
-    comp_data = bp.read(comp_data_size, name='compData')
+    comp_data = bp.bytes(comp_data_size, name='compData')
 
     if comp_data_size <= 0:
         return g
@@ -46,7 +46,7 @@ def readHead(bp: GbxReader) -> Gbx:
 
     bp.data = LZO().decompress(comp_data, data_size)
     bp.pos = 0
-    node = bp.readNode()
+    node = bp.node()
     node.id = NodeId.Body
     # value_handler = bp.value_handler
     # bp.value_handler = former_value_handler
@@ -66,7 +66,7 @@ def readUserData(bp, g):
         g.header_chunk_list = []
         for i in range(num_chunks):
             cid = bp.chunkId(f'{i} chunkId')
-            size = bp.uint32(f'{i} size') % 2 ** 31
+            size = bp.uint32(f'{i} size')
             bp.current_chunk[f'{i} size'] %= 2 ** 31  # Erase the "heavy chunk" marker
             entries[cid] = size
 
@@ -91,10 +91,10 @@ def readUserData(bp, g):
 
 
 def writeHead(bp):
-    bp.read(3, name='magic')
+    bp.bytes(3, name='magic')
 
     version = bp.int16('version')
-    bp.read(3, name='u1')
+    bp.bytes(3, name='u1')
     if version >= 4:
         bp.byte('u2')
 
@@ -123,7 +123,7 @@ def writeHead(bp):
     compData = LZO().compress(bytes(data))
     bp.uint32(len(data), isRef=False)
     bp.uint32(len(compData), isRef=False)
-    bp.read(0, compData, isRef=False)
+    bp.bytes(0, compData, isRef=False)
 
 
 def writeUserData(bp):
@@ -168,5 +168,5 @@ def writeUserData(bp):
     data = bytes(bp_.data)
     bp.uint32(len(data) + 4, isRef=False)
     bp.uint32('numChunks')
-    bp.read(0, data, isRef=False)
+    bp.bytes(0, data, isRef=False)
     bp.chunk_order = bp_.chunk_order
