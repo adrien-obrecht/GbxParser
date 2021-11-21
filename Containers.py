@@ -123,6 +123,27 @@ class Vector2:
         return self.x == other.x and self.y == other.y
 
 
+class File:
+    def __init__(self):
+        self.version = -1
+        self.checksum = -1
+        self.path = ''
+        self.locator_url = ''
+
+    def __repr__(self):
+        return f"{self.path} {self.locator_url}"
+
+
+class Color:
+    def __init__(self):
+        self.r = 0
+        self.g = 0
+        self.b = 0
+
+    def __repr__(self):
+        return f"Color ({self.r}, {self.g}, {self.b})"
+
+
 class Node:
     def __init__(self):
         self.id = None

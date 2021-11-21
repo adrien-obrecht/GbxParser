@@ -1,5 +1,5 @@
 from GameIDs import ChunkId, NodeId
-from Containers import Array, Vector2, Vector3, List, Node, Chunk
+from Containers import Array, Vector2, Vector3, List, Node, Chunk, File, Color
 from Gbx import Gbx
 from Lzo.Lzo import LZO
 
@@ -105,44 +105,37 @@ class GbxReader:
             self.current_chunk[name] = chunk_id
         return chunk_id
 
-    # TODO : Create a color class
-    def color(self, name=None) -> (float, float, float):
+    def color(self, name=None) -> Color:
         """
         Reads a color from the buffer (3 floats)
         :param name: name of the variable if wanted to be saved in memory (default is None)
         :return: the color that was read
         """
-        val = self.float(), self.float(), self.float()
+        c = Color()
+        c.r, c.g, c.b = self.float(), self.float(), self.float()
 
         if name is not None:
-            self.current_chunk[name] = val
-        return val
+            self.current_chunk[name] = c
+        return c
 
-    # TODO : Create a file class
-    def fileRef(self, name=None) -> (str, str, str):
+    def fileRef(self, name=None) -> File:
         """
         Reads a file from the buffer (version, checksum, path, url)
         :param name: name of the variable if wanted to be saved in memory (default is None)
         :return: the file that was read
         """
-        version = int(self.byte())
-        if version >= 3:
-            check_sum = self.bytes(32)
-        else:
-            check_sum = None
+        f = File()
+        f.version = int(self.byte())
+        if f.version >= 3:
+            f.check_sum = self.bytes(32)
 
-        file_path = self.string()
-        if len(file_path) > 0 and version >= 1:
-            locator_url = self.string()
-        else:
-            locator_url = ''
+        f.path = self.string()
+        if f.path and f.version >= 1:
+            f.locator_url = self.string()
 
         if name is not None:
-            self.current_chunk[name] = {'version': version,
-                                        'checksum': check_sum,
-                                        'filePath': file_path,
-                                        'locatorUrl': locator_url}
-        return check_sum, file_path, locator_url
+            self.current_chunk[name] = f
+        return f
 
     def float(self, name=None) -> float:
         """

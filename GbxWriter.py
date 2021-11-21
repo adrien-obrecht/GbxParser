@@ -87,6 +87,16 @@ class GbxWriter:
         self.data += struct.pack('I', val)
         return val
 
+    def color(self, name: str = None):
+        """
+        Writes a color to the buffer
+        :param name: name of the object inside current chunk. Can be an object if is_ref is False
+        """
+        c = self.current_chunk[name]
+        self.float(c.r, is_ref=False)
+        self.float(c.g, is_ref=False)
+        self.float(c.b, is_ref=False)
+
     def nodeId(self, name: Union[str, NodeId], is_ref: bool = True) -> NodeId:
         """
         Writes a nodeId to the buffer (4 bytes in hexadecimal)
@@ -104,18 +114,17 @@ class GbxWriter:
         return val
 
     def fileRef(self, name: str = None):
-        # TODO: Make this not so ugly
         """
-        Writes a file to the buffer
+        Writes a file reference to the buffer
         :param name: name of the object inside current chunk. Can be an object if is_ref is False
         """
-        val = self.current_chunk[name]
-        version = int(self.byte(val['version'], is_ref=False))
-        if version >= 3:
-            self.bytes(32, name=val['checksum'], is_ref=False)
-        file_path = self.string(val['filePath'], is_ref=False)
-        if len(file_path) > 0 and version >= 1:
-            self.string(val['locatorUrl'], is_ref=False)
+        file = self.current_chunk[name]
+        int(self.byte(file.version, is_ref=False))
+        if file.version >= 3:
+            self.bytes(32, name=file.checksum, is_ref=False)
+        self.string(file.path, is_ref=False)
+        if file.path and file.version >= 1:
+            self.string(file.locator_url, is_ref=False)
 
     def float(self, name: Union[str, float], is_ref: bool = True):
         """
