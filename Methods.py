@@ -1,7 +1,8 @@
+# FIXME : ALL THIS IS OBSOLETE!!!!!
+"""
 import binascii
 
 from Headers import Block, Point, Vector3
-
 
 def pushBlockList(bw, blockList):
     bw.value_handler[50606111]['numBlocks'] = len(blockList)
@@ -85,4 +86,4 @@ def pushTriangleInfo(bw, pointList, timeList, triangleList):
 
     vH['u1'] = b'\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x80?\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
 
-    bw.value_handler[50827269]['mediaTrack 0'][50823169]['mediaBlock 0'][50499585] = vH
+    bw.value_handler[50827269]['mediaTrack 0'][50823169]['mediaBlock 0'][50499585] = vH"""

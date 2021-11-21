@@ -1,4 +1,4 @@
-__all__ = ["Header",
+__all__ = [
            "CCGameCtnCollectorList",
            "CGameCtnMediaBlock3dStereo",
            "CGameCtnMediaBlockTriangles",

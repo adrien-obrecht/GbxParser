@@ -181,7 +181,7 @@ class GbxWriter:
             self.int32(self.node_index, is_ref=False)
             self.node_index += 1
             self.nodeId(node.id, is_ref=False)
-            node_data = self.node(node)
+            node_data = self.writeNode(node)
             self.data.extend(node_data)
             self.current_chunk = chunk
         else:
@@ -199,7 +199,7 @@ class GbxWriter:
         self.data.extend(val)
         return val
 
-    def node(self, node: Node) -> bytes:
+    def writeNode(self, node: Node) -> bytes:
         """
         Writes a node to the buffer
         :param node: the node that must be written
@@ -213,13 +213,13 @@ class GbxWriter:
 
             if BlockImporter.is_skipable(chunk.id):
                 logging.info(f"Writing chunk {self.current_chunk.id}")
-                chunk_data = self.chunk(chunk)
+                chunk_data = self.writeChunk(chunk)
                 self.chunkId(ChunkId.Skip, is_ref=False)
                 self.uint32(len(chunk_data), is_ref=False)
                 self.data.extend(chunk_data)
             elif BlockImporter.is_known(chunk.id):
                 logging.info(f"Writing chunk {self.current_chunk.id}")
-                chunk_data = self.chunk(chunk)
+                chunk_data = self.writeChunk(chunk)
                 self.data.extend(chunk_data)
             else:
                 logging.warning(f"Unknown chunk {self.current_chunk.id}")
@@ -307,7 +307,7 @@ class GbxWriter:
         self.float(f2, is_ref=False)
         self.float(f3, is_ref=False)
 
-    def chunk(self, chunk: Chunk) -> bytes:
+    def writeChunk(self, chunk: Chunk) -> bytes:
         """
         Writes a chunk to the buffer
         :param chunk: the chunk that must be written
@@ -322,7 +322,11 @@ class GbxWriter:
         self.data = self.data[:pos_before]
         return bytes(chunk_data)
 
-    def writeHead(self, gbx):
+    def writeHeader(self, gbx):
+        """
+        Write the header of the file to the buffer, including the header chunks
+        :param gbx: the gbx data from which the header data is taken
+        """
         self.bytes(3, b'GBX', is_ref=False)
 
         version = self.int16(6, is_ref=False)
@@ -340,7 +344,7 @@ class GbxWriter:
             for chunk in gbx.header_chunk_list:
                 logging.info(f"Writing chunk {chunk.id}")
                 self.resetLookbackState()
-                chunk_data = self.chunk(chunk)
+                chunk_data = self.writeChunk(chunk)
                 chunk_datas.append(chunk_data)
 
             user_data_size = 4 + sum(len(c) + 8 for c in chunk_datas)  # Chunk + id + size
@@ -358,13 +362,26 @@ class GbxWriter:
             for chunk_data in chunk_datas:
                 self.data.extend(chunk_data)
 
+    def writeBody(self, gbx):
+        """
+        Write the body of the file to the buffer, which consists of a compressed main node
+        :param gbx: the gbx data from which the body data is taken
+        """
         self.uint32(gbx.node_list[0].count_node(), is_ref=False)  # Number of nodes
         self.uint32(0, is_ref=False)  # Number of external nodes
         # TODO : Change gbx.node_list to gbx.main_node
         self.resetLookbackState()
-        node_data = self.node(gbx.node_list[0])
+        node_data = self.writeNode(gbx.node_list[0])
 
         comp_data = LZO().compress(node_data)
         self.uint32(len(node_data), is_ref=False)
         self.uint32(len(comp_data), is_ref=False)
         self.data.extend(comp_data)
+
+    def writeAll(self, gbx):
+        """
+        Write the whole gbx data to the buffer, header and body
+        :param gbx: the gbx data from which the header and body is taken
+        """
+        self.writeHeader(gbx)
+        self.writeBody(gbx)

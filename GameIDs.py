@@ -2,9 +2,9 @@ from enum import Enum
 
 
 class ChunkId(Enum):
-    Header = 0
-    Body = 1
-    Main = 2
+    """
+    Enum of the supported chunk ids (see https://wiki.xaseco.org/wiki/Class_IDs for more info)
+    """
     CControlEffectSimi000 = 117506048
     CControlEffectSimi005 = 117506053
     CGameCtnBlockSkin000 = 50696192
@@ -79,22 +79,24 @@ class ChunkId(Enum):
     CGameGhost005 = 50589701
     CTrackManiaReplayRecord000 = 604495872
     Facade = 0xFACADE01
-    Skip = 0x534B4950
+    Skip = int.from_bytes(b'SKIP', 'big')
     Unknown = 1056968704
 
     @classmethod
-    def intIsId(cls, i):
+    def intIsChunkId(cls, i: int) -> bool:
+        """
+        Returns whether the provided int is a known chunkId
+        :param i: the integer that is tested
+        :return: true if i is a known chunkId
+        """
         return i in set(item.value for item in ChunkId)
-
-    @classmethod
-    def strIsId(cls, s):
-        return s in set(item.name for item in ChunkId)
 
 
 class NodeId(Enum):
-    Header = 0
+    """
+    Enum of the supported node ids (see https://wiki.xaseco.org/wiki/Class_IDs for more info)
+    """
     Body = 1
-    Main = 2
     CControlEffectSimi = 117506048
     CGameCtnBlockSkin = 50696192
     CGameCtnChallenge = 50606080
@@ -112,13 +114,13 @@ class NodeId(Enum):
     CGameCtnMediaTrack = 50823168
     CGameCtnReplayRecord = 50933760
     CTrackManiaReplayRecord = 604495872
-    Facade = 4207599105
     Unknown = 1056968704
 
     @classmethod
-    def intIsId(cls, i):
-        return i in set(item.value for item in ChunkId)
-
-    @classmethod
-    def strIsId(cls, s):
-        return s in set(item.name for item in ChunkId)
+    def intIsNodeId(cls, i: int) -> bool:
+        """
+        Returns whether the provided int is a known nodeId
+        :param i: the integer that is tested
+        :return: true if i is a known nodeId
+        """
+        return i in set(item.value for item in NodeId)

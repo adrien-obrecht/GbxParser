@@ -23,11 +23,11 @@ def test_parse(directory, result):
         result["parsed"] += 1
         result["time_parse"] = t
         reader = GbxReader(path)
-        gbx = reader.file()
+        gbx = reader.readAll()
         try:
             def f(gbx):
                 writer = GbxWriter()
-                writer.writeHead(gbx)
+                writer.writeAll(gbx)
             t = timeit.timeit(lambda: f(gbx), number=NUMBER_OF_TESTS) * 1000
         except BaseException as e:
             logging.error(e)

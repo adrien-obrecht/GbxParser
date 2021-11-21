@@ -1,9 +1,7 @@
 from Classes import *
 from GameIDs import ChunkId
 
-chunkLink = {0x00000000: Header.writeHead,
-
-             0x0301B000: CCGameCtnCollectorList.Chunk000,
+chunkLink = {0x0301B000: CCGameCtnCollectorList.Chunk000,
 
              0x03024000: CGameCtnMediaBlock3dStereo.Chunk000,
 

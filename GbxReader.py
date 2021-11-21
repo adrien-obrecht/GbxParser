@@ -24,6 +24,7 @@ class GbxReader:
         else:
             self.data = data
         self.pos = 0
+        self.gbx = None
         self.frozen_chunks = []
         self.seen_lookback = False
         self.node_index = set()
@@ -97,8 +98,7 @@ class GbxReader:
         :return: the chunkId that was read (ChunkId.Unknown if unknown, which can cause problems)
         """
         val = self.bytes(4, 'I')
-        if not ChunkId.intIsId(val):
-            logging.info(f"Unknown chunk Id {val}")
+        if not ChunkId.intIsChunkId(val):
             return ChunkId.Unknown
         chunk_id = ChunkId(val)
         if name is not None:
@@ -223,7 +223,7 @@ class GbxReader:
         :return: the nodeId that was read (ChunkId.Unknown if unknown, which can cause problems)
         """
         val = self.bytes(4, 'I')
-        if not NodeId.intIsId(val):
+        if not NodeId.intIsNodeId(val):
             logging.error(f"Unknown node Id {val}")
             return NodeId.Unknown
         node_id = NodeId(val)
@@ -242,7 +242,7 @@ class GbxReader:
             self.node_index.add(index)
             id = self.nodeId()
             self.freezeCurrentChunk()
-            node = self.node()
+            node = self.readNode()
             node.id = id
             self.unfreezeCurrentChunk()
         else:
@@ -274,7 +274,7 @@ class GbxReader:
             self.current_chunk[name] = val
         return val
 
-    def chunk(self, id: ChunkId) -> Chunk:
+    def readChunk(self, id: ChunkId) -> Chunk:
         """
         Reads a chunk from the buffer (as a Gbx datatype)
         :param id: ChunkId needed to properly parse the chunk
@@ -287,7 +287,7 @@ class GbxReader:
             BlockImporter.chunkLink[id.value](self)
         return self.current_chunk
 
-    def node(self) -> Node:
+    def readNode(self) -> Node:
         """
         Reads a node from the buffer
         :return: the node that was read
@@ -300,7 +300,6 @@ class GbxReader:
                 return node
             skip_size = -1
             skip = self.chunkId()
-            # TODO use ChunkId.Skip
             if skip == ChunkId.Skip:
                 if not BlockImporter.is_skipable(id):
                     logging.error(f"Chunk {id} should be in skipableChunkList!")
@@ -309,7 +308,7 @@ class GbxReader:
                 self.pos -= 4
             if BlockImporter.is_known(id):
                 logging.info(f"Reading chunk {id}")
-                chunk = self.chunk(id)
+                chunk = self.readChunk(id)
                 node.chunk_list.append(chunk)
             elif skip_size != -1:
                 logging.info(f"Skipping chunk {id}")
@@ -332,24 +331,19 @@ class GbxReader:
         """
         self.pos += num_bytes
 
-    # TODO : figure out how to get rid of decode
-    def string(self, name=None, decode=True) -> str:
+    def string(self, name=None) -> str:
         """
         Reads a string from the buffer (size then data)
         :param name: name of the variable if wanted to be saved in memory (default is None)
-        :param decode: whether to return the utf-8 version or not (almost deprecated, default: true)
         :return: the string that was read
         """
         str_len = self.uint32()
         try:
-            if not decode:
-                val = self.bytes(str_len)
-            else:
-                val = self.bytes(str_len, str(str_len) + 's').decode('utf-8')
+            val = self.bytes(str_len, str(str_len) + 's').decode('utf-8')
 
         except UnicodeDecodeError as e:
             logging.warning(f'Failed to read string: {e}')
-            val = None
+            val = ''
 
         if name is not None:
             self.current_chunk[name] = val
@@ -410,17 +404,15 @@ class GbxReader:
             self.current_chunk[name] = val
         return val
 
-    def file(self) -> Gbx:
+    def readHeader(self):
         """
-        Reads the entire file with which the GbxReader was initialized, from header to body
-        :return: all the data that was read
+        Reads the header of the file with which the GbxReader was initialized
         """
-        gbx = Gbx()
         magic = self.bytes(3)
 
         if magic.decode('utf-8') != 'GBX':
             logging.warning("Not a Gbx file!")
-            return gbx
+            return
 
         version = self.int16()
         compression = self.bytes(3)
@@ -428,7 +420,7 @@ class GbxReader:
             self.byte('u2')
 
         if version >= 3:
-            gbx.id = self.nodeId()
+            self.gbx.id = self.nodeId()
 
         if version >= 6:
             user_data_size = self.uint32()
@@ -440,12 +432,16 @@ class GbxReader:
                     self.resetLookbackState()
                     if id != ChunkId.Unknown:
                         logging.info(f"Reading chunk {id}")
-                        self.chunk(id)
-                        gbx.header_chunk_list.append(self.current_chunk)
+                        self.readChunk(id)
+                        self.gbx.header_chunk_list.append(self.current_chunk)
                     else:
                         logging.warning(f"Skipping chunk {id}")
                         self.skip(size)
 
+    def readBody(self):
+        """
+        Reads the body of the file with which the GbxReader was initialized
+        """
         num_nodes = self.uint32()
         num_external_nodes = self.uint32()
 
@@ -459,14 +455,22 @@ class GbxReader:
         comp_data = self.bytes(comp_data_size)
 
         if comp_data_size <= 0:
-            return gbx
+            return
 
         self.resetLookbackState()
 
         self.data = LZO().decompress(comp_data, data_size)
         self.pos = 0
-        node = self.node()
+        node = self.readNode()
         node.id = NodeId.Body
-        gbx.node_list = [node]
+        self.gbx.node_list = [node]
 
-        return gbx
+    def readAll(self) -> Gbx:
+        """
+        Reads the whole file with which the GbxReader was initialized
+        :return: all the data that was read
+        """
+        self.gbx = Gbx()
+        self.readHeader()
+        self.readBody()
+        return self.gbx

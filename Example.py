@@ -1,6 +1,7 @@
 from GbxReader import GbxReader
 from GbxWriter import GbxWriter
 
+# FIXME ALL THIS IS OBSOLETE
 
 NAME = "test.Clip"
 PATH = "C:\\Users\\User\\Documents\\TrackMania\\Tracks\\Replays\\CreatedGhosts"
