@@ -57,11 +57,15 @@ class ChunkId(Enum):
     CGameCtnMediaBlockCameraGame000 = 50872320
     CGameCtnMediaBlockCameraGame003 = 50872323
     CGameCtnMediaBlockFxBlurMotion000 = 50864128
+    CGameCtnMediaBlockGhost001 = 51269633
+    CGameCtnMediaBlockGhost002 = 51269634
     CGameCtnMediaBlockText000 = 51019776
     CGameCtnMediaBlockText001 = 51019777
     CGameCtnMediaBlockText002 = 51019778
+    CGameCtnMediaBlockTime000 = 50876416
     CGameCtnMediaBlockTrails000 = 51023872
     CGameCtnMediaBlockTransitionFade000 = 51032064
+    CGameCtnMediaBlockTriangles001 = 50499585
     CGameCtnMediaClip000 = 50827264
     CGameCtnMediaClip004 = 50827268
     CGameCtnMediaClip005 = 50827269
@@ -76,6 +80,7 @@ class ChunkId(Enum):
     CGameCtnReplayRecord002 = 50933762
     CGameCtnReplayRecord007 = 50933767
     CGameCtnReplayRecord014 = 50933780
+    CGameCtnReplayRecord015 = 50933781
     CGameGhost005 = 50589701
     CTrackManiaReplayRecord000 = 604495872
     Facade = 0xFACADE01
@@ -106,9 +111,12 @@ class NodeId(Enum):
     CGameCtnMediaBlockCameraCustom = 50995200
     CGameCtnMediaBlockCameraGame = 50872320
     CGameCtnMediaBlockFxBlurMotion = 50864128
+    CGameCtnMediaBlockGhost = 51269632
     CGameCtnMediaBlockText = 51019776
+    CGameCtnMediaBlockTime = 50876416
     CGameCtnMediaBlockTrails = 51023872
     CGameCtnMediaBlockTransitionFade = 51032064
+    CGameCtnMediaBlockTriangles2D = 50638848
     CGameCtnMediaClip = 50827264
     CGameCtnMediaClipGroup = 50831360
     CGameCtnMediaTrack = 50823168

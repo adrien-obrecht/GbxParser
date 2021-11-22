@@ -12,7 +12,6 @@ logging.basicConfig(format='%(asctime)s %(levelname)s : %(message)s', datefmt='%
 def test_parse(directory, result):
     for f in os.listdir(directory):
         path = os.path.join(os.getcwd(), directory, f)
-
         result["nb"] += 1
 
         try:

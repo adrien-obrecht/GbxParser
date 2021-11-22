@@ -79,6 +79,7 @@ chunkLink = {0x0301B000: CCGameCtnCollectorList.Chunk000,
              0x03093002: CGameCtnReplayRecord.Chunk002,
              0x03093007: CGameCtnReplayRecord.Chunk007,
              0x03093014: CGameCtnReplayRecord.Chunk014,
+             0x03093015: CGameCtnReplayRecord.Chunk015,
 
              0x030A1002: CGameCtnMediaBlockCameraPath.Chunk002,
 

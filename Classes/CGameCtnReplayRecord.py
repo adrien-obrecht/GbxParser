@@ -35,8 +35,17 @@ def Chunk007(bp):
 
 
 def Chunk014(bp):
-    bp.bytes(4, name='u1')
+    bp.uint32('version')
     numGhosts = bp.uint32('numGhosts')
     for i in range(numGhosts):
         bp.nodeRef(f'ghost {i}')
-    bp.bytes(16, name='u2')
+    bp.bytes(4, name='u1')
+    num_extras = bp.uint32('num_extras')
+    for i in range(num_extras):
+        bp.uint32(f"extra 1 {i}")
+        bp.uint32(f"extra 2 {i}")
+
+
+def Chunk015(bp):
+    bp.nodeRef('clip')
+

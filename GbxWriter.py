@@ -11,7 +11,7 @@ class GbxWriter:
     def __init__(self):
         self.data = bytearray()
         self.seen_lookback = False
-        self.node_index = 1
+        self.stored_nodes = []
         self.stored_strings = []
         self.current_chunk = None
         self.frozen_chunks = []
@@ -87,12 +87,13 @@ class GbxWriter:
         self.data += struct.pack('I', val)
         return val
 
-    def color(self, name: str = None):
+    def color(self, name: str = None, is_ref: bool = True):
         """
         Writes a color to the buffer
         :param name: name of the object inside current chunk. Can be an object if is_ref is False
+        :param is_ref: whether name is a reference inside current chunk memory or not (default : true)
         """
-        c = self.current_chunk[name]
+        c = self._get_item_by_name(name, is_ref)
         self.float(c.r, is_ref=False)
         self.float(c.g, is_ref=False)
         self.float(c.b, is_ref=False)
@@ -186,12 +187,16 @@ class GbxWriter:
         node = self.current_chunk[name]
         if node is not None and node.id is not None:
             chunk = self.current_chunk
-            # TODO: Figure out how node index really works (sufficient for now)
-            self.int32(self.node_index, is_ref=False)
-            self.node_index += 1
-            self.nodeId(node.id, is_ref=False)
-            node_data = self.writeNode(node)
-            self.data.extend(node_data)
+            if node in self.stored_nodes:
+                index = self.stored_nodes.index(node) + 1
+                self.int32(index, is_ref=False)
+            else:
+                self.stored_nodes.append(node)
+                index = len(self.stored_nodes)
+                self.int32(index, is_ref=False)
+                self.nodeId(node.id, is_ref=False)
+                node_data = self.writeNode(node)
+                self.data.extend(node_data)
             self.current_chunk = chunk
         else:
             self.int32(-1, is_ref=False)
@@ -221,17 +226,17 @@ class GbxWriter:
             self.chunkId(chunk.id, is_ref=False)
 
             if BlockImporter.is_skipable(chunk.id):
-                logging.info(f"Writing chunk {self.current_chunk.id}")
+                logging.info(f"Writing chunk {chunk.id}")
                 chunk_data = self.writeChunk(chunk)
                 self.chunkId(ChunkId.Skip, is_ref=False)
                 self.uint32(len(chunk_data), is_ref=False)
                 self.data.extend(chunk_data)
             elif BlockImporter.is_known(chunk.id):
-                logging.info(f"Writing chunk {self.current_chunk.id}")
+                logging.info(f"Writing chunk {chunk.id}")
                 chunk_data = self.writeChunk(chunk)
                 self.data.extend(chunk_data)
             else:
-                logging.warning(f"Unknown chunk {self.current_chunk.id}")
+                logging.warning(f"Unknown chunk {chunk.id}")
 
         self.chunkId(ChunkId.Facade, is_ref=False)
 
@@ -376,11 +381,15 @@ class GbxWriter:
         Write the body of the file to the buffer, which consists of a compressed main node
         :param gbx: the gbx data from which the body data is taken
         """
-        self.uint32(gbx.node_list[0].count_node(), is_ref=False)  # Number of nodes
-        self.uint32(0, is_ref=False)  # Number of external nodes
-        # TODO : Change gbx.node_list to gbx.main_node
         self.resetLookbackState()
-        node_data = self.writeNode(gbx.node_list[0])
+
+        if gbx.main_node is None:
+            return
+
+        node_data = self.writeNode(gbx.main_node)
+
+        self.uint32(len(self.stored_nodes) + 1, is_ref=False)  # Number of nodes
+        self.uint32(0, is_ref=False)  # Number of external nodes
 
         comp_data = LZO().compress(node_data)
         self.uint32(len(node_data), is_ref=False)

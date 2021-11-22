@@ -27,7 +27,7 @@ class GbxReader:
         self.gbx = None
         self.frozen_chunks = []
         self.seen_lookback = False
-        self.node_index = set()
+        self.node_index = {}
         self.stored_strings = []
         self.current_chunk = Chunk()
 
@@ -99,6 +99,7 @@ class GbxReader:
         """
         val = self.bytes(4, 'I')
         if not ChunkId.intIsChunkId(val):
+            logging.info(f'Unknown Chunk {val}')
             return ChunkId.Unknown
         chunk_id = ChunkId(val)
         if name is not None:
@@ -232,12 +233,14 @@ class GbxReader:
         """
         index = self.int32()
         if index >= 0 and index not in self.node_index:
-            self.node_index.add(index)
             id = self.nodeId()
             self.freezeCurrentChunk()
             node = self.readNode()
             node.id = id
+            self.node_index[index] = node
             self.unfreezeCurrentChunk()
+        elif index in self.node_index:
+            node = self.node_index[index]
         else:
             node = Node()
 
@@ -436,6 +439,7 @@ class GbxReader:
         Reads the body of the file with which the GbxReader was initialized
         """
         num_nodes = self.uint32()
+
         num_external_nodes = self.uint32()
 
         if num_external_nodes > 0:
@@ -453,10 +457,11 @@ class GbxReader:
         self.resetLookbackState()
 
         self.data = LZO().decompress(comp_data, data_size)
+        self.gbx.data = self.data
         self.pos = 0
         node = self.readNode()
         node.id = NodeId.Body
-        self.gbx.node_list = [node]
+        self.gbx.main_node = node
 
     def readAll(self) -> Gbx:
         """
