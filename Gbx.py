@@ -3,6 +3,7 @@ class Gbx:
         self.id = None
         self.header_chunk_list = []
         self.main_node = None
+        self.raw_data = None
 
     def __repr__(self):
         f = f" Gbx : {self.id}\n\n"

@@ -203,9 +203,6 @@ class Node:
 
         return rprint(self, 0)
 
-    def keys(self):
-        return self.data.keys()
-
     def __sub__(self, other):
         n = Node()
 
@@ -214,21 +211,4 @@ class Node:
             n.chunk_list.append(self.chunk_list[i] - other.chunk_list[i])
         return n
 
-    def count_node(self):
-        seen = set()
-
-        def rcount(cont: Union[Node, Chunk]) -> int:
-            s = 0
-            if isinstance(cont, Chunk):
-                for v in cont.data.keys():
-                    s += rcount(cont.data[v])
-            elif isinstance(cont, Node):
-                if id(cont) not in seen:
-                    seen.add(id(cont))
-                    s += 1
-                    for c in cont.chunk_list:
-                        s += rcount(c)
-            return s
-
-        return rcount(self)
 

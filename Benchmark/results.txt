@@ -1,0 +1,7 @@
+Type         Average parsing time (ms)      Average writing time (ms)        Resemblance     
+Config                 18.56                           0.46                     5.576%        
+Scores                  1.86                           0.55                     0.092%        
+Clip                  1352.01                        2983.67                   100.000%       
+Replays                17.41                          15.68                    99.989%        
+FidCache               18.81                           0.21                     0.004%        
+Tracks                 38.05                          17.36                    99.967%        

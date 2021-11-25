@@ -225,7 +225,7 @@ class GbxWriter:
         for chunk in node.chunk_list:
             self.chunkId(chunk.id, is_ref=False)
 
-            if BlockImporter.is_skipable(chunk.id):
+            if BlockImporter.is_skippable(chunk.id):
                 logging.info(f"Writing chunk {chunk.id}")
                 chunk_data = self.writeChunk(chunk)
                 self.chunkId(ChunkId.Skip, is_ref=False)

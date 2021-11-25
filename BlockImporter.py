@@ -109,26 +109,26 @@ chunkLink = {0x0301B000: CCGameCtnCollectorList.Chunk000,
              0x07010003: CControlEffectSimi.Chunk003,
              0x07010005: CControlEffectSimi.Chunk005}
 
-skipableChunkList = {0x03043017,
-                     0x03043018,
-                     0x03043019,
-                     0x0304301C,
-                     0x03043029,
-                     0x03092005,
-                     0x03092008,
-                     0x03092009,
-                     0x0309200a,
-                     0x0309200b,
-                     0x03092013,
-                     0x03092014,
-                     0x03092017,
-                     0x03093007
-                     }
+skippableChunkList = {0x03043017,
+                      0x03043018,
+                      0x03043019,
+                      0x0304301C,
+                      0x03043029,
+                      0x03092005,
+                      0x03092008,
+                      0x03092009,
+                      0x0309200a,
+                      0x0309200b,
+                      0x03092013,
+                      0x03092014,
+                      0x03092017,
+                      0x03093007
+                      }
 
 
 def is_known(id: ChunkId) -> bool:
     return id.value in chunkLink
 
 
-def is_skipable(id: ChunkId) -> bool:
-    return id.value in skipableChunkList
+def is_skippable(id: ChunkId) -> bool:
+    return id.value in skippableChunkList

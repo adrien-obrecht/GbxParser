@@ -12,7 +12,7 @@ class GbxReader:
     """
     arg1 : data, can be a path to a file or a simple string of data
 
-    This object is used to read each Gbx datatype (see https://wiki.xaseco.org/wiki/GBX#Primitives for more info)
+    This object is used to read each SampleGbxFiles datatype (see https://wiki.xaseco.org/wiki/GBX#Primitives for more info)
     It holds some local chunk values, and can therefore add each read values to it's internal memory, if a name is
     provided for it.
     """
@@ -99,7 +99,6 @@ class GbxReader:
         """
         val = self.bytes(4, 'I')
         if not ChunkId.intIsChunkId(val):
-            logging.info(f'Unknown Chunk {val}')
             return ChunkId.Unknown
         chunk_id = ChunkId(val)
         if name is not None:
@@ -272,7 +271,7 @@ class GbxReader:
 
     def readChunk(self, id: ChunkId) -> Chunk:
         """
-        Reads a chunk from the buffer (as a Gbx datatype)
+        Reads a chunk from the buffer (as a SampleGbxFiles datatype)
         :param id: ChunkId needed to properly parse the chunk
         :return: the chunk that was read
         """
@@ -297,8 +296,8 @@ class GbxReader:
             skip_size = -1
             skip = self.chunkId()
             if skip == ChunkId.Skip:
-                if not BlockImporter.is_skipable(id):
-                    logging.error(f"Chunk {id} should be in skipableChunkList!")
+                if not BlockImporter.is_skippable(id):
+                    logging.error(f"Chunk {id} should be in skippableChunkList!")
                 skip_size = self.uint32()
             else:
                 self.pos -= 4
@@ -407,7 +406,7 @@ class GbxReader:
         magic = self.bytes(3)
 
         if magic.decode('utf-8') != 'GBX':
-            logging.warning("Not a Gbx file!")
+            logging.warning("Not a SampleGbxFiles file!")
             return
 
         version = self.int16()
@@ -449,6 +448,9 @@ class GbxReader:
 
         data_size = self.uint32()
         comp_data_size = self.uint32()
+        import binascii
+        self.gbx.raw_data = binascii.hexlify(self.data[:self.pos])
+        self.gbx.raw_data += bytes("AAAAAAAA", 'utf-8')
         comp_data = self.bytes(comp_data_size)
 
         if comp_data_size <= 0:
@@ -457,7 +459,9 @@ class GbxReader:
         self.resetLookbackState()
 
         self.data = LZO().decompress(comp_data, data_size)
-        self.gbx.data = self.data
+
+        self.gbx.raw_data += binascii.hexlify(self.data)
+
         self.pos = 0
         node = self.readNode()
         node.id = NodeId.Body
