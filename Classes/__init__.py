@@ -27,4 +27,6 @@ __all__ = [
            "CGameCtnMediaBlockTrails",
            "CGameCtnMediaBlockTransitionFade",
            "CGameCtnMediaBlockGhost",
-           "CControlEffectSimi"]
+           "CControlEffectSimi",
+           "CSystemConfig",
+           "CSystemConfigDisplay"]
